@@ -1,0 +1,6 @@
+/.parcel-cache
+/build
+/dist
+/grammar/grammar.d.ts
+/grammar/grammar.js
+/node_modules

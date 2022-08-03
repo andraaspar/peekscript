@@ -1,0 +1,10 @@
+/.parcel-cache
+/dist
+/grammar/grammar.ne
+/node_modules
+/src
+/.gitignore
+/index.html
+/jest.config.js
+/tsconfig.json
+/yarn.lock

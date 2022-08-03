@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>TA</title>
+	</head>
+	<body>
+		<script type="module">
+			import { parse } from './src/main.ts'
+			import Interpreter from 'js-interpreter'
+
+			requestAnimationFrame(() => {
+				// const code = `!$foo`
+				const code = `$foo==trim($foo)?$bar+4:$quux?9*9:''`
+				const count = 100
+				const start = performance.now()
+				for (let i = 0; i < count; i++) {
+					parse(code)
+
+					// const interpreter = new Interpreter(code, (interpreter, globalObject) => {
+					// 	interpreter.setProperty(globalObject, '$foo', 'hey ')
+					// 	// interpreter.setProperty(globalObject, 'trim', interpreter.createNativeFunction(s => s.trim()))
+					// 	// interpreter.setProperty(globalObject, '$bar', 5)
+					// 	// interpreter.setProperty(globalObject, '$quux', true)
+					// })
+					// interpreter.run()
+				}
+				console.log(`It took ${Math.round((performance.now() - start))} ms`)
+			})
+		</script>
+	</body>
+</html>
