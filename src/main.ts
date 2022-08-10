@@ -1,1 +1,5 @@
-export { parse } from './parser'
+export { evaluate } from './fun/evaluate'
+export { evaluateAst } from './fun/evaluateAst'
+export { findIdentifiers } from './fun/findIdentifiers'
+export { makeEvaluateAstGenerator } from './fun/makeEvaluateAstGenerator'
+export { parse } from './fun/parse'

@@ -1,4 +1,4 @@
-import { parse } from './parser'
+import { parse } from './parse'
 
 function unparse(ast: any): string {
 	if (Array.isArray(ast)) {
