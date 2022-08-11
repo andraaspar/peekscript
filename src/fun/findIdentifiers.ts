@@ -1,8 +1,10 @@
 import { TExpression } from '../ast/TExpression'
 
-export function findIdentifiers(ast: TExpression): Set<string> {
+export function findIdentifiers(
+	ast: TExpression | null | undefined,
+): Set<string> {
 	const result = new Set<string>()
-	findIdentifiersInternal(ast, result)
+	if (ast != null) findIdentifiersInternal(ast, result)
 	return result
 }
 

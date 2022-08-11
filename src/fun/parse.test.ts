@@ -1,40 +1,38 @@
+import { TExpression } from '../ast/TExpression'
 import { parse } from './parse'
 
-function unparse(ast: any): string {
-	if (Array.isArray(ast)) {
-		return ast.map((item) => unparse(item)).join('⁞')
-	} else if (typeof ast === 'object') {
-		switch (ast.type) {
-			case 'funcall':
-				return `→${ast.identifier}(${ast.params
-					.map((param: any) => unparse(param))
-					.join(', ')})←`
-			case 'unary':
-				return `→${ast.op.value}${unparse(ast.param)}←`
-			case 'equality':
-			case 'sum':
-			case 'product':
-			case 'coalesce':
-			case 'or':
-			case 'and':
-			case 'exponent':
-				return `→${unparse(ast.params[0])} ${ast.op.value} ${unparse(
-					ast.params[1],
-				)}←`
-			case 'grouping':
-				return `(${unparse(ast.expression)})`
-			case 'ternary':
-				return `→${unparse(ast.check)} ? ${unparse(ast.then)} : ${unparse(
-					ast.else,
-				)}←`
-			case 'identifier':
-			case 'keyword':
-			case 'string':
-			case 'number':
-			case 'boolean':
-			case 'nil':
-				return ast.text
-		}
+function unparse(ast: TExpression | null | undefined): string {
+	if (ast == null) {
+		return ''
+	}
+	switch (ast.type) {
+		case 'funcall':
+			return `→${ast.identifier}(${ast.params
+				.map((param) => unparse(param))
+				.join(', ')})←`
+		case 'unary':
+			return `→${ast.op.value}${unparse(ast.param)}←`
+		case 'equality':
+		case 'sum':
+		case 'product':
+		case 'coalesce':
+		case 'or':
+		case 'and':
+		case 'exponent':
+			return `→${unparse(ast.params[0])} ${ast.op.value} ${unparse(
+				ast.params[1],
+			)}←`
+		case 'grouping':
+			return `(${unparse(ast.expression)})`
+		case 'ternary':
+			return `→${unparse(ast.check)} ? ${unparse(ast.then)} : ${unparse(
+				ast.else,
+			)}←`
+		case 'identifier':
+		case 'keyword':
+		case 'string':
+		case 'number':
+			return ast.text
 	}
 	return `►Unknown:${JSON.stringify(ast)}◄`
 }
@@ -161,6 +159,22 @@ test(`[rg1dx7]`, () => {
 	expect(unparse(parse(`5-3`))).toBe(`→5 - 3←`)
 })
 
+test(`[rggm8j]`, () => {
+	expect(unparse(parse(`+3`))).toBe(`→+3←`)
+})
+
+test(`[rggmj1]`, () => {
+	expect(unparse(parse(`-3`))).toBe(`→-3←`)
+})
+
+test(`[rggmjl]`, () => {
+	expect(() => parse(`++3`)).toThrow(/syntax/i)
+})
+
+test(`[rggmoa]`, () => {
+	expect(unparse(parse(`4+-5`))).toBe(`→4 + →-5←←`)
+})
+
 // product
 
 test(`[rg1dwe]`, () => {
@@ -213,6 +227,10 @@ test(`[rg1etr]`, () => {
 
 test(`[rg1euy]`, () => {
 	expect(unparse(parse(`fn( 0 , 1 , 2 )`))).toBe(`→fn(0, 1, 2)←`)
+})
+
+test(`[rggn1t]`, () => {
+	expect(unparse(parse(`a(b(c))`))).toBe(`→a(→b(c)←)←`)
 })
 
 // whitespace
@@ -349,6 +367,14 @@ test(`[rg1hkh]`, () => {
 	expect(unparse(parse(`1*2**3`))).toBe(`→1 * →2 ** 3←←`)
 })
 
+test(`[rggmqm]`, () => {
+	expect(unparse(parse(`!true`))).toBe(`→!true←`)
+})
+
+test(`[rggmqj]`, () => {
+	expect(unparse(parse(`!!true`))).toBe(`→!→!true←←`)
+})
+
 test(`[rg1hny]`, () => {
 	expect(unparse(parse(`!-1`))).toBe(`→!→-1←←`)
 })
@@ -363,4 +389,10 @@ test(`[rg1ido]`, () => {
 
 test(`[rg1ik8]`, () => {
 	expect(unparse(parse(`!fn()`))).toBe(`→!→fn()←←`)
+})
+
+// Errors
+
+test(`[rggeyp]`, () => {
+	expect(() => unparse(parse(`()`))).toThrow(/syntax/i)
 })

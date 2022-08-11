@@ -114,32 +114,53 @@ test(`[rgepf8]`, () => {
 	expect(evaluate(`(1+2)*3`, envMapFrom({}))).toBe(9)
 })
 
+test(`[rggaza]`, () => {
+	expect(evaluate(`'hey' + 'ho'`, envMapFrom({}))).toBe('heyho')
+})
+
 test(`[rgepnu]`, () => {
+	let env: TEnvMap
 	expect(
 		evaluate(
 			`filter(myArray, 'item % 2 == 0')`,
-			envMapFrom({
+			(env = envMapFrom({
 				myArray: JSON.stringify([0, 1, 2, 3, 4]),
 				filter: (what, how) => {
 					if (typeof what !== 'string' || typeof how !== 'string') {
 						throw new Error(
-							`Invalid args. Expected: string, string Got: ${typeof what} ${typeof how}`,
+							`Invalid args. Expected: string, string Got: ${typeof what}, ${typeof how}`,
 						)
 					}
-					const ast = parse(how)[0]
-					const env: TEnvMap = new Map()
+					const ast = parse(how)
+					const innerEnv: TEnvMap = new Map(env)
 					const arr = JSON.parse(what)
 					if (!Array.isArray(arr)) {
 						throw new Error(`Expected array, got: ${what}`)
 					}
 					return JSON.stringify(
 						(arr as number[]).filter((n) => {
-							env.set('item', n)
-							return evaluateAst(ast, env)
+							innerEnv.set('item', n)
+							return evaluateAst(ast, innerEnv)
 						}),
 					)
 				},
-			}),
+			})),
 		),
 	).toBe(`[0,2,4]`)
+})
+
+test(`[rggfgy]`, () => {
+	expect(() => evaluate(`a`, envMapFrom({}))).toThrow(/defined/i)
+})
+
+test(`[rggfj1]`, () => {
+	expect(() => evaluate(`a+b`, envMapFrom({ a: 5 }))).toThrow(/defined/i)
+})
+
+test(`[rggjtw]`, () => {
+	expect(evaluate(`a?b:c`, envMapFrom({ a: true, b: 0, c: 1 }))).toBe(0)
+})
+
+test(`[rggjv8]`, () => {
+	expect(evaluate(`a?b:c`, envMapFrom({ a: false, b: 0, c: 1 }))).toBe(1)
 })

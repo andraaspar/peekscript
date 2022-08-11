@@ -8,9 +8,5 @@ export function evaluate(
 	env: TEnvMap,
 	steps?: number,
 ): TBasicValues {
-	const asts = parse(code)
-	if (asts.length > 1) {
-		throw new Error(`[rgekiu] Ambiguous code: ${code}`)
-	}
-	return evaluateAst(asts[0], env, steps)
+	return evaluateAst(parse(code), env, steps)
 }

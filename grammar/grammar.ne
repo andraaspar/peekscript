@@ -112,7 +112,9 @@ exponent ->
     {% id %}
 
 unary ->
-  ("!"|"+"|"-") _ unary
+  ("!") _ unary
+    {% data => ({ type: 'unary', op: data[0][0], param: data[2] }) %}
+  | ("+"|"-") _ funcall
     {% data => ({ type: 'unary', op: data[0][0], param: data[2] }) %}
   | funcall
     {% id %}
@@ -126,8 +128,8 @@ funcall ->
     {% id %}
 
 funparams ->
-  "(" ( _ expression (_ ","):? ):* _ ")"
-    {% data => data[1].map(it => it[1]) %}
+  "(" ( _ expression _ "," ):* (_ expression):? _ ")"
+    {% data => (data[2] ? [...data[1], data[2]] : data[1]).map(it => it[1]) %}
 
 grouping ->
   "(" _ expression _ ")"

@@ -8,24 +8,56 @@
 	</head>
 	<body>
 		<script type="module">
-			import { parse } from './src/main.ts'
+			import { evaluate, CachedEvaluator } from './src/main.ts'
 			import Interpreter from 'js-interpreter'
 
 			requestAnimationFrame(() => {
 				// const code = `!$foo`
 				const code = `$foo==trim($foo)?$bar+4:$quux?9*9:''`
-				const count = 100
+				const count = 1000
 				const start = performance.now()
+
+				const evaluator = new CachedEvaluator()
+
+				function eval2(code, env) {
+					return (new Function(`${Object.entries(env)
+						.map(([k, v]) => `var ${k}=this.${k}`)
+						.join(';')
+						};return (${code})`)).apply(env)
+				}
+
 				for (let i = 0; i < count; i++) {
-					parse(code)
+					// const result = eval2(code, {
+					// 	trim: s => s.trim(),
+					// 	$foo: 'hey ',
+					// 	$bar: 5,
+					// 	$quux: true,
+					// })
+
+					// const result = evaluate(code, new Map(Object.entries({
+					// 	trim: s => s.trim(),
+					// 	$foo: 'hey ',
+					// 	$bar: 5,
+					// 	$quux: true,
+					// })))
+
+					const result = evaluator.evaluate(code, new Map(Object.entries({
+						trim: s => s.trim(),
+						$foo: 'hey ',
+						$bar: 5,
+						$quux: true,
+					})))
 
 					// const interpreter = new Interpreter(code, (interpreter, globalObject) => {
 					// 	interpreter.setProperty(globalObject, '$foo', 'hey ')
-					// 	// interpreter.setProperty(globalObject, 'trim', interpreter.createNativeFunction(s => s.trim()))
-					// 	// interpreter.setProperty(globalObject, '$bar', 5)
-					// 	// interpreter.setProperty(globalObject, '$quux', true)
+					// 	interpreter.setProperty(globalObject, 'trim', interpreter.createNativeFunction(s => s.trim()))
+					// 	interpreter.setProperty(globalObject, '$bar', 5)
+					// 	interpreter.setProperty(globalObject, '$quux', true)
 					// })
 					// interpreter.run()
+					// const result = interpreter.value
+
+					if (i === 0 || i === 99) console.log(result)
 				}
 				console.log(`It took ${Math.round((performance.now() - start))} ms`)
 			})

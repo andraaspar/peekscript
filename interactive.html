@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>PeekScript Interactive</title>
+	</head>
+	<body>
+		<div><textarea id="env-in" style='width:100%' rows='10'></textarea></div>
+		<div><input id="code" style='width:100%'></div>
+		<div>Result:</div>
+		<div><pre id="out"></pre>
+		</div>
+		<div>AST:</div>
+		<div><pre id="ast-out"></pre>
+		</div>
+		<script type="module">
+			import { evaluateAst, parse } from './src/main.ts'
+
+			const envIn = document.getElementById('env-in')
+			const code = document.getElementById('code')
+			const astOut = document.getElementById('ast-out')
+			const out = document.getElementById('out')
+
+			function oninput(e) {
+				try {
+					const env2 = new Map(Object.entries((new Function(`return ({${envIn.value}})`))()))
+					const ast = parse(code.value)
+					console.log('AST:', ast)
+					astOut.innerText = JSON.stringify(ast, null, 2)
+					try {
+						const result = evaluateAst(ast, env2)
+						console.log('Result:', result)
+						out.innerText = JSON.stringify(result, null, 2)
+					} catch (e) {
+						console.error(e)
+						out.innerText = e + ''
+					}
+				} catch (e) {
+					console.error(e)
+					out.innerText = e + ''
+					astOut.innerText = '-'
+				}
+			}
+			code.addEventListener('input', oninput)
+			envIn.addEventListener('input', oninput)
+			oninput()
+		</script>
+	</body>
+</html>

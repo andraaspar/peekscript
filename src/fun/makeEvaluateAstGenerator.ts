@@ -1,6 +1,7 @@
 import { TExpression } from '../ast/TExpression'
 import { TBasicValues } from '../model/TBasicValues'
 import { TEnvMap } from '../model/TEnvMap'
+import { locationToString } from './locationToString'
 
 export function* makeEvaluateAstGenerator(
 	ast: TExpression,
@@ -16,7 +17,19 @@ export function* makeEvaluateAstGenerator(
 			return ast.value
 		case 'unary': {
 			const r0 = yield* makeEvaluateAstGenerator(ast.param, env)
-			return !r0
+			switch (ast.op.value) {
+				case '!':
+					return !r0
+				case '+':
+					return r0
+				case '-':
+					return -r0!
+			}
+			throw new Error(
+				`[rggmgx] Invalid unary operator: ${ast.op?.value} ${locationToString(
+					ast.op,
+				)}`,
+			)
 		}
 		case 'and': {
 			const r0 = yield* makeEvaluateAstGenerator(ast.params[0], env)
@@ -69,18 +82,26 @@ export function* makeEvaluateAstGenerator(
 				case '===':
 					return r0 === r1
 			}
-			throw new Error(`[rgek2k] Invalid operator: ${ast.op.value}`)
+			throw new Error(
+				`[rgek2k] Invalid operator: ${ast.op.value} ${locationToString(
+					ast.op,
+				)}`,
+			)
 		}
 		case 'funcall': {
 			if (!env.has(ast.identifier.value)) {
 				throw new Error(
-					`[rgelgy] Function not defined: ${ast.identifier.value}`,
+					`[rgelgy] Function not defined: ${
+						ast.identifier.value
+					} ${locationToString(ast.identifier)}`,
 				)
 			}
 			const fn = env.get(ast.identifier.value)
 			if (typeof fn !== 'function') {
 				throw new Error(
-					`[rgeqnc] Cannot invoke non-function value: ${ast.identifier.value}`,
+					`[rgeqnc] Cannot invoke non-function value: ${
+						ast.identifier.value
+					} ${locationToString(ast.identifier)}`,
 				)
 			}
 			const params: TBasicValues[] = []
@@ -101,12 +122,20 @@ export function* makeEvaluateAstGenerator(
 			return yield* makeEvaluateAstGenerator(ast.expression, env)
 		case 'identifier': {
 			if (!env.has(ast.value)) {
-				throw new Error(`[rgeldo] Variable not defined: ${ast.value}`)
+				throw new Error(
+					`[rgeldo] Variable not defined: ${ast.value} ${locationToString(
+						ast,
+					)}`,
+				)
 			}
 			const r0 = env.get(ast.value)
 			switch (typeof r0) {
 				case 'function':
-					throw new Error(`[rgeqjw] Cannot use function as value: ${ast.value}`)
+					throw new Error(
+						`[rgeqjw] Cannot use function as value: ${
+							ast.value
+						} ${locationToString(ast)}`,
+					)
 				case 'boolean':
 				case 'number':
 				case 'string':
