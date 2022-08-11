@@ -6,14 +6,25 @@ const g = Grammar.fromCompiled(grammar)
 
 export function parse(code: string): TExpression | null | undefined {
 	const parser = new Parser(g)
-	parser.feed(code)
-	const asts = parser.results as TExpression[]
-	if (asts.length > 1) {
-		// console.error(`[rggn62]`, JSON.stringify(asts, null, 2))
-		throw new Error(`[rgekiu] Ambiguous code: ${code}`)
+	try {
+		parser.feed(code)
+		const asts = parser.results as TExpression[]
+		if (asts.length > 1) {
+			// console.error(`[rggn62]`, JSON.stringify(asts, null, 2))
+			throw new Error(`[rgekiu] Ambiguous code: ${code}`)
+		}
+		if (asts.length === 0 && code.trim()) {
+			throw new Error(`[rggm2b] Could not parse code: ${code}`)
+		}
+		return asts[0]
+	} catch (e) {
+		if (e instanceof Error) {
+			if (/\s*Instead, I was/i.test(e.message)) {
+				throw new Error(e.message.replace(/\s*Instead, I was[^]*/, ''), {
+					cause: e,
+				})
+			}
+		}
+		throw e
 	}
-	if (asts.length === 0 && code.trim()) {
-		throw new Error(`[rggm2b] Could not parse code: ${code}`)
-	}
-	return asts[0]
 }
