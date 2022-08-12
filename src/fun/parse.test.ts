@@ -121,16 +121,8 @@ test(`[rg1edv]`, () => {
 	expect(unparse(parse(`1 == 1`))).toBe(`→1 == 1←`)
 })
 
-test(`[rg1phs]`, () => {
-	expect(unparse(parse(`1 === 1`))).toBe(`→1 === 1←`)
-})
-
 test(`[rg1edv]`, () => {
 	expect(unparse(parse(`1 != 1`))).toBe(`→1 != 1←`)
-})
-
-test(`[rg1pi2]`, () => {
-	expect(unparse(parse(`1 !== 1`))).toBe(`→1 !== 1←`)
 })
 
 test(`[rg1ei0]`, () => {

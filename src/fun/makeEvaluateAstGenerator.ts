@@ -1,12 +1,13 @@
 import { TExpression } from '../ast/TExpression'
-import { TBasicValues } from '../model/TBasicValues'
 import { TEnvMap } from '../model/TEnvMap'
+import { TOutValues } from '../model/TOutValues'
+import { assertType } from './assertType'
 import { locationToString } from './locationToString'
 
 export function* makeEvaluateAstGenerator(
 	ast: TExpression,
 	env: TEnvMap,
-): Generator<void, TBasicValues, never> {
+): Generator<void, TOutValues, never> {
 	yield
 	switch (ast.type) {
 		case 'keyword':
@@ -19,11 +20,14 @@ export function* makeEvaluateAstGenerator(
 			const r0 = yield* makeEvaluateAstGenerator(ast.param, env)
 			switch (ast.op.value) {
 				case '!':
+					assertType(r0, 'boolean', ast.op)
 					return !r0
 				case '+':
+					assertType(r0, 'number', ast.op)
 					return r0
 				case '-':
-					return -r0!
+					assertType(r0, 'number', ast.op)
+					return -r0
 			}
 			throw new Error(
 				`[rggmgx] Invalid unary operator: ${ast.op?.value} ${locationToString(
@@ -33,13 +37,19 @@ export function* makeEvaluateAstGenerator(
 		}
 		case 'and': {
 			const r0 = yield* makeEvaluateAstGenerator(ast.params[0], env)
+			assertType(r0, 'boolean', ast.op)
 			if (!r0) return r0
-			return yield* makeEvaluateAstGenerator(ast.params[1], env)
+			const r1 = yield* makeEvaluateAstGenerator(ast.params[1], env)
+			assertType(r1, 'boolean', ast.op)
+			return r1
 		}
 		case 'or': {
 			const r0 = yield* makeEvaluateAstGenerator(ast.params[0], env)
+			assertType(r0, 'boolean', ast.op)
 			if (r0) return r0
-			return yield* makeEvaluateAstGenerator(ast.params[1], env)
+			const r1 = yield* makeEvaluateAstGenerator(ast.params[1], env)
+			assertType(r1, 'boolean', ast.op)
+			return r1
 		}
 		case 'coalesce': {
 			const r0 = yield* makeEvaluateAstGenerator(ast.params[0], env)
@@ -54,32 +64,50 @@ export function* makeEvaluateAstGenerator(
 			const r1 = yield* makeEvaluateAstGenerator(ast.params[1], env) as any
 			switch (ast.op.value) {
 				case '**':
+					assertType(r0, 'number', ast.op)
+					assertType(r1, 'number', ast.op)
 					return r0 ** r1
 				case '+':
+					if (typeof r0 !== 'string' && typeof r1 !== 'string') {
+						assertType(r0, 'number', ast.op)
+						assertType(r1, 'number', ast.op)
+					}
 					return r0 + r1
 				case '-':
+					assertType(r0, 'number', ast.op)
+					assertType(r1, 'number', ast.op)
 					return r0 - r1
 				case '*':
+					assertType(r0, 'number', ast.op)
+					assertType(r1, 'number', ast.op)
 					return r0 * r1
 				case '/':
+					assertType(r0, 'number', ast.op)
+					assertType(r1, 'number', ast.op)
 					return r0 / r1
 				case '%':
+					assertType(r0, 'number', ast.op)
+					assertType(r1, 'number', ast.op)
 					return r0 % r1
-				case '!==':
-					return r0 !== r1
 				case '!=':
-					return r0 != r1
+					return r0 !== r1
 				case '<':
+					assertType(r0, 'number', ast.op)
+					assertType(r1, 'number', ast.op)
 					return r0 < r1
 				case '<=':
+					assertType(r0, 'number', ast.op)
+					assertType(r1, 'number', ast.op)
 					return r0 <= r1
 				case '>':
+					assertType(r0, 'number', ast.op)
+					assertType(r1, 'number', ast.op)
 					return r0 > r1
 				case '>=':
+					assertType(r0, 'number', ast.op)
+					assertType(r1, 'number', ast.op)
 					return r0 >= r1
 				case '==':
-					return r0 == r1
-				case '===':
 					return r0 === r1
 			}
 			throw new Error(
@@ -104,7 +132,7 @@ export function* makeEvaluateAstGenerator(
 					} ${locationToString(ast.identifier)}`,
 				)
 			}
-			const params: TBasicValues[] = []
+			const params: TOutValues[] = []
 			for (const param of ast.params) {
 				params.push(yield* makeEvaluateAstGenerator(param, env))
 			}

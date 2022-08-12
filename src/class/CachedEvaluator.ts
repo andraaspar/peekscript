@@ -3,8 +3,8 @@ import { evaluateAst } from '../fun/evaluateAst'
 import { findIdentifiers } from '../fun/findIdentifiers'
 import { parse } from '../fun/parse'
 import { DEFAULT_STEPS } from '../model/constants'
-import { TBasicValues } from '../model/TBasicValues'
 import { TEnvMap } from '../model/TEnvMap'
+import { TOutValues } from '../model/TOutValues'
 
 export interface IState {
 	code: string
@@ -12,7 +12,7 @@ export interface IState {
 	steps: number
 	ast: TExpression | null | undefined
 	identifiers: Set<string>
-	result: TBasicValues
+	result: TOutValues
 }
 
 const DEFAULT_STATE: IState = {
@@ -37,7 +37,7 @@ export class CachedEvaluator {
 		this.#evaluateAst = evaluateAstFunction
 	}
 
-	evaluate(code: string, env: TEnvMap, steps = DEFAULT_STEPS): TBasicValues {
+	evaluate(code: string, env: TEnvMap, steps = DEFAULT_STEPS): TOutValues {
 		const newState: Partial<IState> = {
 			code,
 			steps,

@@ -60,7 +60,7 @@ test(`[rgelvi]`, () => {
 	expect(evaluate(`1/2`, envMapFrom({}))).toBe(0.5)
 })
 
-test(`[rgelw3]`, () => {
+test(`[rgi40p]`, () => {
 	expect(evaluate(`9%5`, envMapFrom({}))).toBe(4)
 })
 
@@ -77,11 +77,7 @@ test(`[rgen4d]`, () => {
 })
 
 test(`[rgen4f]`, () => {
-	expect(evaluate(`'1'==1`, envMapFrom({}))).toBe(true)
-})
-
-test(`[rgen5t]`, () => {
-	expect(evaluate(`'1'===1`, envMapFrom({}))).toBe(false)
+	expect(evaluate(`'1'==1`, envMapFrom({}))).toBe(false)
 })
 
 test(`[rgel39]`, () => {

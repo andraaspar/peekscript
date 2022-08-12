@@ -1,14 +1,14 @@
 import { TExpression } from '../ast/TExpression'
 import { DEFAULT_STEPS } from '../model/constants'
-import { TBasicValues } from '../model/TBasicValues'
 import { TEnvMap } from '../model/TEnvMap'
+import { TOutValues } from '../model/TOutValues'
 import { makeEvaluateAstGenerator } from './makeEvaluateAstGenerator'
 
 export function evaluateAst(
 	ast: TExpression | null | undefined,
 	env: TEnvMap,
 	steps = DEFAULT_STEPS,
-): TBasicValues {
+): TOutValues {
 	if (ast == null) {
 		return null
 	}

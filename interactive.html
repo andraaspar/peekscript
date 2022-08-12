@@ -17,6 +17,7 @@
 		</div>
 		<script type="module">
 			import { evaluateAst, parse } from './src/main.ts'
+			import Decimal from 'decimal.js'
 
 			const envIn = document.getElementById('env-in')
 			const code = document.getElementById('code')
@@ -25,12 +26,12 @@
 
 			function oninput(e) {
 				try {
-					const env2 = new Map(Object.entries((new Function(`return ({${envIn.value}})`))()))
+					const env = new Map(Object.entries((new Function(`return ({${envIn.value}})`))()))
 					const ast = parse(code.value)
 					console.log('AST:', ast)
 					astOut.innerText = JSON.stringify(ast, null, 2)
 					try {
-						const result = evaluateAst(ast, env2)
+						const result = evaluateAst(ast, env)
 						console.log('Result:', result)
 						out.innerText = JSON.stringify(result, null, 2)
 					} catch (e) {
