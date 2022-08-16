@@ -114,6 +114,18 @@ test(`[rggaza]`, () => {
 	expect(evaluate(`'hey' + 'ho'`, envMapFrom({}))).toBe('heyho')
 })
 
+test(`[rgpfy2]`, () => {
+	expect(evaluate(`'high' + 5`, envMapFrom({}))).toBe('high5')
+})
+
+test(`[rgpfy8]`, () => {
+	expect(evaluate(`3+'cm'`, envMapFrom({}))).toBe('3cm')
+})
+
+test(`[rgpfz9]`, () => {
+	expect(evaluate(`'Result: '+1+'cm'`, envMapFrom({}))).toBe('Result: 1cm')
+})
+
 test(`[rgepnu]`, () => {
 	let env: TEnvMap
 	expect(
