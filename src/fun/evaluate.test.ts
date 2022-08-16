@@ -160,3 +160,87 @@ test(`[rggjtw]`, () => {
 test(`[rggjv8]`, () => {
 	expect(evaluate(`a?b:c`, envMapFrom({ a: false, b: 0, c: 1 }))).toBe(1)
 })
+
+test(`[rgpf0t]`, () => {
+	expect(evaluate(`+7`, envMapFrom({}))).toBe(7)
+})
+
+test(`[rgpf7r]`, () => {
+	expect(evaluate(`!true`, envMapFrom({}))).toBe(false)
+})
+
+test(`[rgpf93]`, () => {
+	expect(evaluate(`true && true`, envMapFrom({}))).toBe(true)
+})
+
+test(`[rgpf9s]`, () => {
+	expect(evaluate(`true && false`, envMapFrom({}))).toBe(false)
+})
+
+test(`[rgpfa4]`, () => {
+	expect(evaluate(`false || true`, envMapFrom({}))).toBe(true)
+})
+
+test(`[rgpfa6]`, () => {
+	expect(evaluate(`false || false`, envMapFrom({}))).toBe(false)
+})
+
+test(`[rgpfbs]`, () => {
+	expect(evaluate(`null ?? true`, envMapFrom({}))).toBe(true)
+})
+
+test(`[rgpfbs]`, () => {
+	expect(evaluate(`false ?? true`, envMapFrom({}))).toBe(false)
+})
+
+test(`[rgpfdg]`, () => {
+	expect(evaluate(`2**2`, envMapFrom({}))).toBe(4)
+})
+
+test(`[rgpfet]`, () => {
+	expect(evaluate(`1<2`, envMapFrom({}))).toBe(true)
+})
+
+test(`[rgpff6]`, () => {
+	expect(evaluate(`2<2`, envMapFrom({}))).toBe(false)
+})
+
+test(`[rgpffh]`, () => {
+	expect(evaluate(`2<=2`, envMapFrom({}))).toBe(true)
+})
+
+test(`[rgpffh]`, () => {
+	expect(evaluate(`3<=2`, envMapFrom({}))).toBe(false)
+})
+
+test(`[rgpfga]`, () => {
+	expect(evaluate(`2>1`, envMapFrom({}))).toBe(true)
+})
+
+test(`[rgpfgm]`, () => {
+	expect(evaluate(`2>2`, envMapFrom({}))).toBe(false)
+})
+
+test(`[rgpfgz]`, () => {
+	expect(evaluate(`2>=2`, envMapFrom({}))).toBe(true)
+})
+
+test(`[rgpfhc]`, () => {
+	expect(evaluate(`2>=3`, envMapFrom({}))).toBe(false)
+})
+
+test(`[rgpfif]`, () => {
+	expect(() => evaluate(`fn()`, envMapFrom({}))).toThrow(/defined/i)
+})
+
+test(`[rgpfk4]`, () => {
+	expect(() => evaluate(`fn()`, envMapFrom({ fn: 1 }))).toThrow(/invoke/i)
+})
+
+test(`[rgpfll]`, () => {
+	expect(evaluate(`a`, envMapFrom({ a: [] as any }))).toBe(null)
+})
+
+test(`[rgpfp3]`, () => {
+	expect(() => evaluate(`(`, envMapFrom({}))).toThrow(/parse/i)
+})

@@ -13,6 +13,7 @@ export interface IState {
 	ast: TExpression | null | undefined
 	identifiers: Set<string>
 	result: TOutValues
+	error: any
 }
 
 const DEFAULT_STATE: IState = {
@@ -22,6 +23,7 @@ const DEFAULT_STATE: IState = {
 	env: new Map(),
 	steps: DEFAULT_STEPS,
 	result: null,
+	error: undefined,
 }
 
 export class CachedEvaluator {
@@ -42,33 +44,43 @@ export class CachedEvaluator {
 			code,
 			steps,
 		}
-		let mustEvaluate = false
-		if (steps !== this.#state.steps) {
-			mustEvaluate = true
-		}
-		if (code === this.#state.code) {
-			mustEvaluate =
-				mustEvaluate ||
-				this.#envValuesChanged(this.#state.identifiers, this.#state.env, env)
-			newState.ast = this.#state.ast
-			newState.identifiers = this.#state.identifiers
-		} else {
-			mustEvaluate = true
-			newState.ast = this.#parse(code)
-			newState.identifiers = findIdentifiers(newState.ast)
-		}
-		if (mustEvaluate) {
-			newState.result = this.#evaluateAst(newState.ast, env, steps)
-		} else {
-			newState.result = this.#state.result
-		}
-		newState.env = new Map()
-		for (const identifier of newState.identifiers) {
-			if (env.has(identifier)) {
-				newState.env.set(identifier, env.get(identifier))
+		try {
+			let mustEvaluate = false
+			if (steps !== this.#state.steps) {
+				mustEvaluate = true
 			}
+			if (code === this.#state.code) {
+				mustEvaluate =
+					mustEvaluate ||
+					this.#envValuesChanged(this.#state.identifiers, this.#state.env, env)
+				newState.ast = this.#state.ast
+				newState.identifiers = this.#state.identifiers
+			} else {
+				mustEvaluate = true
+				newState.ast = this.#parse(code)
+				newState.identifiers = findIdentifiers(newState.ast)
+			}
+			if (mustEvaluate) {
+				newState.result = this.#evaluateAst(newState.ast, env, steps)
+			} else {
+				newState.result = this.#state.result
+				if (this.#state.error) {
+					throw this.#state.error
+				}
+			}
+		} catch (e) {
+			newState.error = e
+			throw e
+		} finally {
+			newState.identifiers = newState.identifiers || new Set()
+			newState.env = new Map()
+			for (const identifier of newState.identifiers) {
+				if (env.has(identifier)) {
+					newState.env.set(identifier, env.get(identifier))
+				}
+			}
+			this.#state = newState as IState
 		}
-		this.#state = newState as IState
 		return newState.result
 	}
 

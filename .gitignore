@@ -1,5 +1,6 @@
 /.parcel-cache
 /build
+/coverage
 /dist
 /grammar/grammar.d.ts
 /grammar/grammar.js

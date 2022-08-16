@@ -25,21 +25,22 @@ function makeCachedEvaluatorWithCounts() {
 
 test(`[rggc6a] Cache hit with env.`, () => {
 	const { counts, evaluator } = makeCachedEvaluatorWithCounts()
-	const code = `a+b`
+	const code = `true?fn(a+(-b)):0`
+	const identity = <T>(it: T): T => it
 	const result0 = evaluator.evaluate(
 		code,
-		new Map(Object.entries({ a: 5, b: 3, c: 0 })),
+		new Map(Object.entries({ a: 5, b: 3, c: 0, fn: identity })),
 	)
 	expect(counts.parseCount).toBe(1)
 	expect(counts.evaluateCount).toBe(1)
-	expect(result0).toBe(8)
+	expect(result0).toBe(2)
 	const result1 = evaluator.evaluate(
 		code,
-		new Map(Object.entries({ a: 5, b: 3, c: 1 })),
+		new Map(Object.entries({ a: 5, b: 3, c: 1, fn: identity })),
 	)
 	expect(counts.parseCount).toBe(1) // No parse: no code change
 	expect(counts.evaluateCount).toBe(1) // No eval: no relevant env change
-	expect(result1).toBe(8) // From cache
+	expect(result1).toBe(2) // From cache
 })
 
 test(`[rgge5l] Cache hit no env.`, () => {
@@ -134,9 +135,14 @@ test(`[rgges2] Syntax error.`, () => {
 	)
 	expect(counts.parseCount).toBe(2) // Parse: this is counted before it throws
 	expect(counts.evaluateCount).toBe(1) // No eval: throw prevented
+	expect(() => evaluator.evaluate(`()`, new Map(Object.entries(env)))).toThrow(
+		/syntax/i,
+	)
+	expect(counts.parseCount).toBe(2) // No parse: error is cached
+	expect(counts.evaluateCount).toBe(1) // No eval: error is cached
 	const result2 = evaluator.evaluate(`a+b`, new Map(Object.entries(env)))
-	expect(counts.parseCount).toBe(2) // No parse: last parse failed, therefore the state from before is used
-	expect(counts.evaluateCount).toBe(1) // No eval: this state matches the one from before the error
+	expect(counts.parseCount).toBe(3) // Parse: code changed
+	expect(counts.evaluateCount).toBe(2) // Eval: code chnaged
 	expect(result2).toBe(8)
 })
 
@@ -154,11 +160,16 @@ test(`[rggf8r] Variable not defined error.`, () => {
 	).toThrow(/defined/i)
 	expect(counts.parseCount).toBe(1) // No parse: same code
 	expect(counts.evaluateCount).toBe(2) // Eval: env changed
+	expect(() =>
+		evaluator.evaluate(`a+b`, new Map(Object.entries({ a: 5 }))),
+	).toThrow(/defined/i)
+	expect(counts.parseCount).toBe(1) // No parse: same code
+	expect(counts.evaluateCount).toBe(2) // No eval: env unchanged
 	const result1 = evaluator.evaluate(
 		`a+b`,
 		new Map(Object.entries({ a: 5, b: 3 })),
 	)
 	expect(counts.parseCount).toBe(1) // No parse: same code
-	expect(counts.evaluateCount).toBe(2) // No eval: matches state from before the error
+	expect(counts.evaluateCount).toBe(3) // Eval: code changed
 	expect(result1).toBe(8)
 })
