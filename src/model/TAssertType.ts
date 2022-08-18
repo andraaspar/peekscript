@@ -10,3 +10,5 @@ export type TAssertType =
 	| 'function'
 	// Extras
 	| 'null'
+	| 'rational'
+	| 'decimal'

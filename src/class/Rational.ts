@@ -1,11 +1,13 @@
-export class Fraction {
+import { Decimal } from './Decimal'
+
+export class Rational {
 	#numerator: bigint
 	#denominator: bigint
 	#signMultiplier: bigint
 
 	constructor(
-		numerator: number | string | bigint,
-		denominator: number | string | bigint = 1n,
+		numerator: bigint,
+		denominator: bigint = 1n,
 		signMultiplier: bigint = 1n,
 	) {
 		this.#signMultiplier = signMultiplier < 0n ? -1n : 1n
@@ -28,7 +30,7 @@ export class Fraction {
 	}
 
 	clone() {
-		return new Fraction(
+		return new Rational(
 			this.#numerator,
 			this.#denominator,
 			this.#signMultiplier,
@@ -47,7 +49,7 @@ export class Fraction {
 		return this.#signMultiplier < 0n
 	}
 
-	isEqualTo(other: Fraction): boolean {
+	isEqualTo(other: Rational): boolean {
 		return (
 			other.#signMultiplier === this.#signMultiplier &&
 			other.#numerator === this.#numerator &&
@@ -55,7 +57,7 @@ export class Fraction {
 		)
 	}
 
-	isSmallerThan(other: Fraction): boolean {
+	isLessThan(other: Rational): boolean {
 		if (this.#signMultiplier !== other.#signMultiplier) {
 			return this.#signMultiplier < other.#signMultiplier
 		}
@@ -65,7 +67,7 @@ export class Fraction {
 		)
 	}
 
-	isGreaterThan(other: Fraction): boolean {
+	isGreaterThan(other: Rational): boolean {
 		if (this.#signMultiplier !== other.#signMultiplier) {
 			return this.#signMultiplier > other.#signMultiplier
 		}
@@ -75,20 +77,37 @@ export class Fraction {
 		)
 	}
 
-	static fromNumber(n: number): Fraction {
+	isLessThanOrEqualTo(other: Rational) {
+		return this.isLessThan(other) || this.isEqualTo(other)
+	}
+
+	isGreaterThanOrEqualTo(other: Rational) {
+		return this.isGreaterThan(other) || this.isEqualTo(other)
+	}
+
+	static fromNumber(n: number): Rational {
 		const signMultiplier = n < 0 ? -1n : 1n
 		let positiveN = Math.abs(n)
 		const fractionPart = positiveN % 1
 		if (fractionPart === 0) {
-			return new Fraction(positiveN, 1, signMultiplier)
+			return new Rational(BigInt(positiveN), 1n, signMultiplier)
 		} else {
 			let denominator = 1
 			while (positiveN % 1) {
 				positiveN *= 10
 				denominator *= 10
 			}
-			return new Fraction(positiveN, denominator, signMultiplier)
+			return new Rational(
+				BigInt(positiveN),
+				BigInt(denominator),
+				signMultiplier,
+			)
 		}
+	}
+
+	static fromString(s: string): Rational {
+		const [numerator, denominator = ''] = s.split('/')
+		return new Rational(BigInt(numerator), BigInt(denominator))
 	}
 
 	#gcd(a: bigint, b: bigint): bigint {
@@ -140,32 +159,41 @@ export class Fraction {
 		}
 	}
 
-	negated(): Fraction {
-		return new Fraction(
+	toDecimal(precision: number) {
+		return new Decimal(
+			(this.#signMultiplier *
+				(this.#numerator * 10n ** BigInt(precision + 1))) /
+				this.#denominator,
+			precision + 1,
+		).toDecimalPlaces(precision)
+	}
+
+	negated(): Rational {
+		return new Rational(
 			this.#numerator,
 			this.#denominator,
 			-this.#signMultiplier,
 		)
 	}
 
-	add(other: Fraction) {
-		return new Fraction(
+	plus(other: Rational) {
+		return new Rational(
 			this.#signMultiplier * this.#numerator * other.#denominator +
 				other.#signMultiplier * other.#numerator * this.#denominator,
 			this.#denominator * other.#denominator,
 		)
 	}
 
-	subtract(other: Fraction) {
-		return new Fraction(
+	minus(other: Rational) {
+		return new Rational(
 			this.#signMultiplier * this.#numerator * other.#denominator -
 				other.#signMultiplier * other.#numerator * this.#denominator,
 			this.#denominator * other.#denominator,
 		)
 	}
 
-	multipliedBy(other: Fraction) {
-		return new Fraction(
+	multipliedBy(other: Rational) {
+		return new Rational(
 			this.#signMultiplier *
 				this.#numerator *
 				other.#signMultiplier *
@@ -174,8 +202,8 @@ export class Fraction {
 		)
 	}
 
-	dividedBy(other: Fraction) {
-		return new Fraction(
+	dividedBy(other: Rational) {
+		return new Rational(
 			this.#signMultiplier *
 				this.#numerator *
 				other.#signMultiplier *
@@ -184,22 +212,73 @@ export class Fraction {
 		)
 	}
 
-	toThePowerOf(other: Fraction) {
+	remainder(other: Rational) {
+		return new Rational(
+			(this.#signMultiplier * (this.#numerator * other.#denominator)) %
+				(this.#denominator * other.#numerator),
+			this.#denominator * other.denominator,
+		)
+	}
+
+	// 	function rootNth(val, k=2n) {
+	//     let o = 0n; // old approx value
+	//     let x = val;
+	//     let limit = 100;
+
+	//     while(x**k!==k && x!==o && --limit) {
+	//       o=x;
+	//       x = ((k-1n)*x + val/x**(k-1n))/k;
+	//     }
+
+	//     return x;
+	// }
+
+	// #root(val: bigint, k: bigint): bigint {
+	// 	let prevN = 0n // old approx value
+	// 	let n = val
+	// 	let limit = 100
+	// 	while (n ** k !== k && n !== prevN) {
+	// 		if (--limit < 0) {
+	// 			throw new Error(`[rgt5gw] Root calculation too complex.`)
+	// 		}
+	// 		prevN = n
+	// 		n = ((k - 1n) * n + val / n ** (k - 1n)) / k
+	// 	}
+
+	// 	return n
+	// }
+
+	toThePowerOf(other: Rational) {
 		if (other.#denominator === 1n) {
 			if (other.isNegative) {
-				return new Fraction(
+				return new Rational(
 					this.#denominator ** other.#numerator,
 					this.#numerator ** other.#numerator,
 					this.#signMultiplier,
 				)
 			} else {
-				return new Fraction(
+				return new Rational(
 					this.#numerator ** other.#numerator,
 					this.#denominator ** other.#numerator,
 					this.#signMultiplier,
 				)
 			}
 		}
+		//  else if (other.#numerator === 1n) {
+		// 	if (other.isNegative) {
+		// 		return new ExactNum(
+		// 			this.#root(this.#denominator, other.#denominator),
+		// 			this.#root(this.#numerator, other.#denominator),
+		// 			this.#signMultiplier,
+		// 		)
+		// 	} else {
+		// 		return new ExactNum(
+		// 			this.#root(this.#numerator, other.#denominator),
+		// 			this.#root(this.#denominator, other.#denominator),
+		// 			this.#signMultiplier,
+		// 		)
+		// 	}
+		// }
 		throw new Error(
 			`[rgpz5u] Exponentiation not implemented for: ${other.toString()}`,
 		)

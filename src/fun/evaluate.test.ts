@@ -25,11 +25,11 @@ test(`[rgektx]`, () => {
 })
 
 test(`[rgekll]`, () => {
-	expect(evaluate(`3`, envMapFrom({}))).toBe(3)
+	expect(evaluate(`3`, envMapFrom({}))?.toString()).toBe('3')
 })
 
 test(`[rgeksv]`, () => {
-	expect(evaluate(`3.14`, envMapFrom({}))).toBe(3.14)
+	expect(evaluate(`3.14`, envMapFrom({}))?.toString()).toBe('3.14')
 })
 
 test(`[rgekx5]`, () => {
@@ -37,7 +37,7 @@ test(`[rgekx5]`, () => {
 })
 
 test(`[rgel03]`, () => {
-	expect(evaluate(`a`, envMapFrom({ a: 3.14 }))).toBe(3.14)
+	expect(evaluate(`a`, envMapFrom({ a: 3.14 }))?.toString()).toBe('3.14')
 })
 
 test(`[rgelim]`, () => {
@@ -45,23 +45,27 @@ test(`[rgelim]`, () => {
 })
 
 test(`[rgelre]`, () => {
-	expect(evaluate(`5+2`, envMapFrom({}))).toBe(7)
+	expect(evaluate(`5+2`, envMapFrom({}))?.toString()).toBe('7')
 })
 
 test(`[rgeluc]`, () => {
-	expect(evaluate(`5-2`, envMapFrom({}))).toBe(3)
+	expect(evaluate(`5-2`, envMapFrom({}))?.toString()).toBe('3')
 })
 
 test(`[rgelus]`, () => {
-	expect(evaluate(`7*8`, envMapFrom({}))).toBe(56)
+	expect(evaluate(`7*8`, envMapFrom({}))?.toString()).toBe('56')
 })
 
 test(`[rgelvi]`, () => {
-	expect(evaluate(`1/2`, envMapFrom({}))).toBe(0.5)
+	expect(evaluate(`1/2`, envMapFrom({}))?.toString()).toBe('0.5')
+})
+
+test(`[rgt4in]`, () => {
+	expect(evaluate(`1/3*3==1`, envMapFrom({}))).toBe(true)
 })
 
 test(`[rgi40p]`, () => {
-	expect(evaluate(`9%5`, envMapFrom({}))).toBe(4)
+	expect(evaluate(`9%5`, envMapFrom({}))?.toString()).toBe('4')
 })
 
 test(`[rgelw3]`, () => {
@@ -91,23 +95,19 @@ test(`[rgelka]`, () => {
 })
 
 test(`[rgelkl]`, () => {
-	expect(evaluate(`fn()`, envMapFrom({ fn: () => 3.14 }))).toBe(3.14)
+	expect(evaluate(`fn()`, envMapFrom({ fn: () => 3.14 }))?.toString()).toBe(
+		'3.14',
+	)
 })
 
 test(`[rgen6u]`, () => {
 	expect(() =>
-		evaluate([...Array(501).keys()].join('+'), envMapFrom({})),
+		evaluate([...Array(501).keys()].join('+'), envMapFrom({}))?.toString(),
 	).toThrow(/limit/i)
 })
 
-test(`[rgeo8q]`, () => {
-	expect(
-		evaluate(`add(1,2)`, envMapFrom({ add: (a: any, b: any) => a + b })),
-	).toBe(3)
-})
-
 test(`[rgepf8]`, () => {
-	expect(evaluate(`(1+2)*3`, envMapFrom({}))).toBe(9)
+	expect(evaluate(`(1+2)*3`, envMapFrom({}))?.toString()).toBe('9')
 })
 
 test(`[rggaza]`, () => {
@@ -166,15 +166,19 @@ test(`[rggfj1]`, () => {
 })
 
 test(`[rggjtw]`, () => {
-	expect(evaluate(`a?b:c`, envMapFrom({ a: true, b: 0, c: 1 }))).toBe(0)
+	expect(
+		evaluate(`a?b:c`, envMapFrom({ a: true, b: 0, c: 1 }))?.toString(),
+	).toBe('0')
 })
 
 test(`[rggjv8]`, () => {
-	expect(evaluate(`a?b:c`, envMapFrom({ a: false, b: 0, c: 1 }))).toBe(1)
+	expect(
+		evaluate(`a?b:c`, envMapFrom({ a: false, b: 0, c: 1 }))?.toString(),
+	).toBe('1')
 })
 
 test(`[rgpf0t]`, () => {
-	expect(evaluate(`+7`, envMapFrom({}))).toBe(7)
+	expect(evaluate(`+7`, envMapFrom({}))?.toString()).toBe('7')
 })
 
 test(`[rgpf7r]`, () => {
@@ -206,7 +210,7 @@ test(`[rgpfbs]`, () => {
 })
 
 test(`[rgpfdg]`, () => {
-	expect(evaluate(`2**2`, envMapFrom({}))).toBe(4)
+	expect(evaluate(`2**2`, envMapFrom({}))?.toString()).toBe('4')
 })
 
 test(`[rgpfet]`, () => {

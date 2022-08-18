@@ -1,6 +1,9 @@
 import { TExpression } from '../ast/TExpression'
+import { Decimal } from '../class/Decimal'
+import { Rational } from '../class/Rational'
 import { TEnvMap } from '../model/TEnvMap'
 import { TOutValues } from '../model/TOutValues'
+import { assertErrorText } from './assertErrorText'
 import { assertType } from './assertType'
 import { locationToString } from './locationToString'
 
@@ -13,21 +16,41 @@ export function* makeEvaluateAstGenerator(
 		case 'keyword':
 			return ast.value
 		case 'number':
-			return parseFloat(ast.value)
+			return Decimal.fromString(ast.value)
 		case 'string':
 			return ast.value
 		case 'unary': {
 			const r0 = yield* makeEvaluateAstGenerator(ast.param, env)
 			switch (ast.op.value) {
 				case '!':
-					assertType(r0, 'boolean', ast.op)
+					if (typeof r0 !== 'boolean') {
+						throw new Error(
+							`[rgtkbf] ` + assertErrorText(r0, 'boolean', ast.op),
+						)
+					}
 					return !r0
 				case '+':
-					assertType(r0, 'number', ast.op)
-					return r0
+					if (typeof r0 === 'object') {
+						if (r0 instanceof Rational) {
+							return r0
+						} else if (r0 instanceof Decimal) {
+							return r0
+						}
+					}
+					throw new Error(
+						`[rgtkb3] ` + assertErrorText(r0, ['rational', 'decimal'], ast.op),
+					)
 				case '-':
-					assertType(r0, 'number', ast.op)
-					return -r0
+					if (typeof r0 === 'object') {
+						if (r0 instanceof Rational) {
+							return r0.negated()
+						} else if (r0 instanceof Decimal) {
+							return r0.negated()
+						}
+					}
+					throw new Error(
+						`[rgtkb3] ` + assertErrorText(r0, ['rational', 'decimal'], ast.op),
+					)
 			}
 			throw new Error(
 				`[rggmgx] Invalid unary operator: ${ast.op?.value} ${locationToString(
@@ -60,54 +83,344 @@ export function* makeEvaluateAstGenerator(
 		case 'product':
 		case 'sum':
 		case 'exponent': {
-			const r0 = yield* makeEvaluateAstGenerator(ast.params[0], env) as any
-			const r1 = yield* makeEvaluateAstGenerator(ast.params[1], env) as any
+			const r0 = yield* makeEvaluateAstGenerator(ast.params[0], env)
+			const r1 = yield* makeEvaluateAstGenerator(ast.params[1], env)
 			switch (ast.op.value) {
-				case '**':
-					assertType(r0, 'number', ast.op)
-					assertType(r1, 'number', ast.op)
-					return r0 ** r1
-				case '+':
-					if (typeof r0 !== 'string' && typeof r1 !== 'string') {
-						assertType(r0, 'number', ast.op)
-						assertType(r1, 'number', ast.op)
+				case '**': {
+					if (typeof r0 === 'object' && typeof r1 === 'object') {
+						if (r0 instanceof Rational) {
+							if (r1 instanceof Rational) {
+								return r0.toThePowerOf(r1)
+							} else if (r1 instanceof Decimal) {
+								return r0.toThePowerOf(r1.toRational())
+							} else {
+								throw new Error(
+									`[rgtkir] ` +
+										assertErrorText(r1, ['rational', 'decimal'], ast.op),
+								)
+							}
+						} else if (r0 instanceof Decimal) {
+							if (r1 instanceof Decimal) {
+								return r0.toRational().toThePowerOf(r1.toRational())
+							} else if (r1 instanceof Rational) {
+								return r0.toRational().toThePowerOf(r1)
+							} else {
+								throw new Error(
+									`[rgtkl8] ` +
+										assertErrorText(r1, ['rational', 'decimal'], ast.op),
+								)
+							}
+						}
 					}
-					return r0 + r1
+					throw new Error(
+						`[rgtkb3] ` + assertErrorText(r0, ['rational', 'decimal'], ast.op),
+					)
+				}
+				case '+':
+					if (typeof r0 === 'object' && typeof r1 === 'object') {
+						if (r0 instanceof Rational) {
+							if (r1 instanceof Rational) {
+								return r0.plus(r1)
+							} else if (r1 instanceof Decimal) {
+								return r0.plus(r1.toRational())
+							} else {
+								throw new Error(
+									`[rgtl58] ` +
+										assertErrorText(r1, ['rational', 'decimal'], ast.op),
+								)
+							}
+						} else if (r0 instanceof Decimal) {
+							if (r1 instanceof Decimal) {
+								return r0.plus(r1)
+							} else if (r1 instanceof Rational) {
+								return r0.toRational().plus(r1)
+							} else {
+								throw new Error(
+									`[rgtl5b] ` +
+										assertErrorText(r1, ['rational', 'decimal'], ast.op),
+								)
+							}
+						}
+						throw new Error(
+							`[rgtl5d] ` +
+								assertErrorText(r0, ['rational', 'decimal'], ast.op),
+						)
+					}
+					if (typeof r0 === 'string') {
+						return r0 + r1
+					} else if (typeof r1 === 'string') {
+						return r0 + r1
+					} else {
+						throw new Error(
+							`[rgtlce] Invalid operands for concatenation: ${typeof r0}, ${typeof r1} ` +
+								locationToString(ast.op),
+						)
+					}
 				case '-':
-					assertType(r0, 'number', ast.op)
-					assertType(r1, 'number', ast.op)
-					return r0 - r1
+					if (typeof r0 === 'object' && typeof r1 === 'object') {
+						if (r0 instanceof Rational) {
+							if (r1 instanceof Rational) {
+								return r0.minus(r1)
+							} else if (r1 instanceof Decimal) {
+								return r0.minus(r1.toRational())
+							} else {
+								throw new Error(
+									`[rgtlhr] ` +
+										assertErrorText(r1, ['rational', 'decimal'], ast.op),
+								)
+							}
+						} else if (r0 instanceof Decimal) {
+							if (r1 instanceof Decimal) {
+								return r0.minus(r1)
+							} else if (r1 instanceof Rational) {
+								return r0.toRational().minus(r1)
+							} else {
+								throw new Error(
+									`[rgtlj9] ` +
+										assertErrorText(r1, ['rational', 'decimal'], ast.op),
+								)
+							}
+						}
+					}
+					throw new Error(
+						`[rgtljj] ` + assertErrorText(r0, ['rational', 'decimal'], ast.op),
+					)
 				case '*':
-					assertType(r0, 'number', ast.op)
-					assertType(r1, 'number', ast.op)
-					return r0 * r1
+					if (typeof r0 === 'object' && typeof r1 === 'object') {
+						if (r0 instanceof Rational) {
+							if (r1 instanceof Rational) {
+								return r0.multipliedBy(r1)
+							} else if (r1 instanceof Decimal) {
+								return r0.multipliedBy(r1.toRational())
+							} else {
+								throw new Error(
+									`[rgtlk7] ` +
+										assertErrorText(r1, ['rational', 'decimal'], ast.op),
+								)
+							}
+						} else if (r0 instanceof Decimal) {
+							if (r1 instanceof Decimal) {
+								return r0.multipliedBy(r1)
+							} else if (r1 instanceof Rational) {
+								return r0.toRational().multipliedBy(r1)
+							} else {
+								throw new Error(
+									`[rgtlk9] ` +
+										assertErrorText(r1, ['rational', 'decimal'], ast.op),
+								)
+							}
+						}
+					}
+					throw new Error(
+						`[rgtlkc] ` + assertErrorText(r0, ['rational', 'decimal'], ast.op),
+					)
 				case '/':
-					assertType(r0, 'number', ast.op)
-					assertType(r1, 'number', ast.op)
-					return r0 / r1
+					if (typeof r0 === 'object' && typeof r1 === 'object') {
+						if (r0 instanceof Rational) {
+							if (r1 instanceof Rational) {
+								return r0.dividedBy(r1)
+							} else if (r1 instanceof Decimal) {
+								return r0.dividedBy(r1.toRational())
+							} else {
+								throw new Error(
+									`[rgtllf] ` +
+										assertErrorText(r1, ['rational', 'decimal'], ast.op),
+								)
+							}
+						} else if (r0 instanceof Decimal) {
+							if (r1 instanceof Decimal) {
+								return r0.toRational().dividedBy(r1.toRational())
+							} else if (r1 instanceof Rational) {
+								return r0.toRational().dividedBy(r1)
+							} else {
+								throw new Error(
+									`[rgtlmc] ` +
+										assertErrorText(r1, ['rational', 'decimal'], ast.op),
+								)
+							}
+						}
+					}
+					throw new Error(
+						`[rgtlme] ` + assertErrorText(r0, ['rational', 'decimal'], ast.op),
+					)
 				case '%':
-					assertType(r0, 'number', ast.op)
-					assertType(r1, 'number', ast.op)
-					return r0 % r1
+					if (typeof r0 === 'object' && typeof r1 === 'object') {
+						if (r0 instanceof Rational) {
+							if (r1 instanceof Rational) {
+								return r0.remainder(r1)
+							} else if (r1 instanceof Decimal) {
+								return r0.remainder(r1.toRational())
+							} else {
+								throw new Error(
+									`[rgtlor] ` +
+										assertErrorText(r1, ['rational', 'decimal'], ast.op),
+								)
+							}
+						} else if (r0 instanceof Decimal) {
+							if (r1 instanceof Decimal) {
+								return r0.toRational().remainder(r1.toRational())
+							} else if (r1 instanceof Rational) {
+								return r0.toRational().remainder(r1)
+							} else {
+								throw new Error(
+									`[rgtlou] ` +
+										assertErrorText(r1, ['rational', 'decimal'], ast.op),
+								)
+							}
+						}
+					}
+					throw new Error(
+						`[rgtlow] ` + assertErrorText(r0, ['rational', 'decimal'], ast.op),
+					)
 				case '!=':
+					if (typeof r0 === 'object' && typeof r1 === 'object') {
+						if (r0 instanceof Rational) {
+							if (r1 instanceof Rational) {
+								return !r0.isEqualTo(r1)
+							} else if (r1 instanceof Decimal) {
+								return !r0.isEqualTo(r1.toRational())
+							}
+						} else if (r0 instanceof Decimal) {
+							if (r1 instanceof Decimal) {
+								return !r0.isEqualTo(r1)
+							} else if (r1 instanceof Rational) {
+								return !r0.toRational().isEqualTo(r1)
+							}
+						}
+					}
 					return r0 !== r1
 				case '<':
-					assertType(r0, 'number', ast.op)
-					assertType(r1, 'number', ast.op)
-					return r0 < r1
+					if (typeof r0 === 'object' && typeof r1 === 'object') {
+						if (r0 instanceof Rational) {
+							if (r1 instanceof Rational) {
+								return r0.isLessThan(r1)
+							} else if (r1 instanceof Decimal) {
+								return r0.isLessThan(r1.toRational())
+							} else {
+								throw new Error(
+									`[rgtm1b] ` +
+										assertErrorText(r1, ['rational', 'decimal'], ast.op),
+								)
+							}
+						} else if (r0 instanceof Decimal) {
+							if (r1 instanceof Decimal) {
+								return r0.isLessThan(r1)
+							} else if (r1 instanceof Rational) {
+								return r0.toRational().isLessThan(r1)
+							} else {
+								throw new Error(
+									`[rgtm1s] ` +
+										assertErrorText(r1, ['rational', 'decimal'], ast.op),
+								)
+							}
+						}
+					}
+					throw new Error(
+						`[rgtm1u] ` + assertErrorText(r0, ['rational', 'decimal'], ast.op),
+					)
 				case '<=':
-					assertType(r0, 'number', ast.op)
-					assertType(r1, 'number', ast.op)
-					return r0 <= r1
+					if (typeof r0 === 'object' && typeof r1 === 'object') {
+						if (r0 instanceof Rational) {
+							if (r1 instanceof Rational) {
+								return r0.isLessThanOrEqualTo(r1)
+							} else if (r1 instanceof Decimal) {
+								return r0.isLessThanOrEqualTo(r1.toRational())
+							} else {
+								throw new Error(
+									`[rgtm6u] ` +
+										assertErrorText(r1, ['rational', 'decimal'], ast.op),
+								)
+							}
+						} else if (r0 instanceof Decimal) {
+							if (r1 instanceof Decimal) {
+								return r0.isLessThanOrEqualTo(r1)
+							} else if (r1 instanceof Rational) {
+								return r0.toRational().isLessThanOrEqualTo(r1)
+							} else {
+								throw new Error(
+									`[rgtm71] ` +
+										assertErrorText(r1, ['rational', 'decimal'], ast.op),
+								)
+							}
+						}
+					}
+					throw new Error(
+						`[rgtm74] ` + assertErrorText(r0, ['rational', 'decimal'], ast.op),
+					)
 				case '>':
-					assertType(r0, 'number', ast.op)
-					assertType(r1, 'number', ast.op)
-					return r0 > r1
+					if (typeof r0 === 'object' && typeof r1 === 'object') {
+						if (r0 instanceof Rational) {
+							if (r1 instanceof Rational) {
+								return r0.isGreaterThan(r1)
+							} else if (r1 instanceof Decimal) {
+								return r0.isGreaterThan(r1.toRational())
+							} else {
+								throw new Error(
+									`[rgtm82] ` +
+										assertErrorText(r1, ['rational', 'decimal'], ast.op),
+								)
+							}
+						} else if (r0 instanceof Decimal) {
+							if (r1 instanceof Decimal) {
+								return r0.isGreaterThan(r1)
+							} else if (r1 instanceof Rational) {
+								return r0.toRational().isGreaterThan(r1)
+							} else {
+								throw new Error(
+									`[rgtm84] ` +
+										assertErrorText(r1, ['rational', 'decimal'], ast.op),
+								)
+							}
+						}
+					}
+					throw new Error(
+						`[rgtm86] ` + assertErrorText(r0, ['rational', 'decimal'], ast.op),
+					)
 				case '>=':
-					assertType(r0, 'number', ast.op)
-					assertType(r1, 'number', ast.op)
-					return r0 >= r1
+					if (typeof r0 === 'object' && typeof r1 === 'object') {
+						if (r0 instanceof Rational) {
+							if (r1 instanceof Rational) {
+								return r0.isGreaterThanOrEqualTo(r1)
+							} else if (r1 instanceof Decimal) {
+								return r0.isGreaterThanOrEqualTo(r1.toRational())
+							} else {
+								throw new Error(
+									`[rgtm8m] ` +
+										assertErrorText(r1, ['rational', 'decimal'], ast.op),
+								)
+							}
+						} else if (r0 instanceof Decimal) {
+							if (r1 instanceof Decimal) {
+								return r0.isGreaterThanOrEqualTo(r1)
+							} else if (r1 instanceof Rational) {
+								return r0.toRational().isGreaterThanOrEqualTo(r1)
+							} else {
+								throw new Error(
+									`[rgtm8r] ` +
+										assertErrorText(r1, ['rational', 'decimal'], ast.op),
+								)
+							}
+						}
+					}
+					throw new Error(
+						`[rgtm8t] ` + assertErrorText(r0, ['rational', 'decimal'], ast.op),
+					)
 				case '==':
+					if (typeof r0 === 'object' && typeof r1 === 'object') {
+						if (r0 instanceof Rational) {
+							if (r1 instanceof Rational) {
+								return r0.isEqualTo(r1)
+							} else if (r1 instanceof Decimal) {
+								return r0.isEqualTo(r1.toRational())
+							}
+						} else if (r0 instanceof Decimal) {
+							if (r1 instanceof Decimal) {
+								return r0.isEqualTo(r1)
+							} else if (r1 instanceof Rational) {
+								return r0.toRational().isEqualTo(r1)
+							}
+						}
+					}
 					return r0 === r1
 			}
 			throw new Error(
@@ -139,9 +452,18 @@ export function* makeEvaluateAstGenerator(
 			const r = fn(...params)
 			switch (typeof r) {
 				case 'boolean':
-				case 'number':
 				case 'string':
 					return r
+				case 'number':
+					return Rational.fromNumber(r)
+				case 'object':
+					if (r instanceof Rational) {
+						return r
+					} else if (r instanceof Decimal) {
+						return r
+					} else {
+						return null
+					}
 				default:
 					return null
 			}
@@ -165,9 +487,18 @@ export function* makeEvaluateAstGenerator(
 						} ${locationToString(ast)}`,
 					)
 				case 'boolean':
-				case 'number':
 				case 'string':
 					return r0
+				case 'number':
+					return Rational.fromNumber(r0)
+				case 'object':
+					if (r0 instanceof Rational) {
+						return r0
+					} else if (r0 instanceof Decimal) {
+						return r0
+					} else {
+						return null
+					}
 				default:
 					return null
 			}
