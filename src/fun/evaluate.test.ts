@@ -29,7 +29,7 @@ test(`[rgekll]`, () => {
 })
 
 test(`[rgeksv]`, () => {
-	expect(evaluate(`3.14`, envMapFrom({}))?.toString()).toBe('3.14')
+	expect(evaluate(`3.1`, envMapFrom({}))?.toString()).toBe('31/10')
 })
 
 test(`[rgekx5]`, () => {
@@ -37,7 +37,7 @@ test(`[rgekx5]`, () => {
 })
 
 test(`[rgel03]`, () => {
-	expect(evaluate(`a`, envMapFrom({ a: 3.14 }))?.toString()).toBe('3.14')
+	expect(evaluate(`a`, envMapFrom({ a: 3.1 }))?.toString()).toBe('31/10')
 })
 
 test(`[rgelim]`, () => {
@@ -57,7 +57,7 @@ test(`[rgelus]`, () => {
 })
 
 test(`[rgelvi]`, () => {
-	expect(evaluate(`1/2`, envMapFrom({}))?.toString()).toBe('0.5')
+	expect(evaluate(`1/2`, envMapFrom({}))?.toString()).toBe('1/2')
 })
 
 test(`[rgt4in]`, () => {
@@ -95,8 +95,8 @@ test(`[rgelka]`, () => {
 })
 
 test(`[rgelkl]`, () => {
-	expect(evaluate(`fn()`, envMapFrom({ fn: () => 3.14 }))?.toString()).toBe(
-		'3.14',
+	expect(evaluate(`fn()`, envMapFrom({ fn: () => 3.1 }))?.toString()).toBe(
+		'31/10',
 	)
 })
 

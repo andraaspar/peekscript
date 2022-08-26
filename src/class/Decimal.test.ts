@@ -17,7 +17,7 @@ test(`[rgta0o]`, () => {
 })
 
 test(`[rgtbdf]`, () => {
-	const it = new Decimal(123n, 2).toDecimalPlaces(1)
+	const it = new Decimal(123n, 2).toDecimal(1)
 	expect(it.value).toBe(12n)
 	expect(it.decimalPlaces).toBe(1)
 	expect(it.toFixed(2)).toBe('1.20')
@@ -25,7 +25,7 @@ test(`[rgtbdf]`, () => {
 })
 
 test(`[rgtc9f]`, () => {
-	const it = new Decimal(125n, 2).toDecimalPlaces(1)
+	const it = new Decimal(125n, 2).toDecimal(1)
 	expect(it.value).toBe(13n)
 	expect(it.decimalPlaces).toBe(1)
 	expect(it.toFixed(1)).toBe('1.3')
@@ -33,7 +33,7 @@ test(`[rgtc9f]`, () => {
 })
 
 test(`[rgtc7f]`, () => {
-	const it = new Decimal(295n, 2).toDecimalPlaces(1)
+	const it = new Decimal(295n, 2).toDecimal(1)
 	expect(it.value).toBe(3n)
 	expect(it.decimalPlaces).toBe(0)
 	expect(it.toFixed(1)).toBe('3.0')
@@ -41,11 +41,19 @@ test(`[rgtc7f]`, () => {
 })
 
 test(`[rgtip8]`, () => {
-	const it = new Decimal(666n, 3).toDecimalPlaces(2)
+	const it = new Decimal(666n, 3).toDecimal(2)
 	expect(it.value).toBe(67n)
 	expect(it.decimalPlaces).toBe(2)
 	expect(it.toFixed(3)).toBe('0.670')
 	expect(it.toString()).toBe('0.67')
+})
+
+test(`[rh890b]`, () => {
+	const it = new Decimal(12345678911234567891n, 20).toDecimal(10)
+	expect(it.value).toBe(1234567891n)
+	expect(it.decimalPlaces).toBe(10)
+	expect(it.toFixed(11)).toBe('0.12345678910')
+	expect(it.toString()).toBe('0.1234567891')
 })
 
 test(`[rgtdaw]`, () => {

@@ -16,24 +16,33 @@
 		<div><pre id="ast-out"></pre>
 		</div>
 		<script type="module">
-			import { evaluateAst, parse } from './src/main.ts'
-			import Decimal from 'decimal.js'
+			import { evaluateAst, parse, Decimal, Rational } from './src/main.ts'
 
 			const envIn = document.getElementById('env-in')
 			const code = document.getElementById('code')
 			const astOut = document.getElementById('ast-out')
 			const out = document.getElementById('out')
 
+			envIn.value = localStorage.getItem('peekscript-env') ?? ''
+			code.value = localStorage.getItem('peekscript-code') ?? ''
+
 			function oninput(e) {
 				try {
-					const env = new Map(Object.entries((new Function(`return ({${envIn.value}})`))()))
+					localStorage.setItem('peekscript-env', envIn.value)
+					localStorage.setItem('peekscript-code', code.value)
+					const env = new Map(Object.entries((new Function(`'use strict';const Rational=this.Rational;const Decimal=this.Decimal;return ({${envIn.value}})`)).apply({ Rational, Decimal })))
 					const ast = parse(code.value)
 					console.log('AST:', ast)
 					astOut.innerText = JSON.stringify(ast, null, 2)
 					try {
 						const result = evaluateAst(ast, env)
-						console.log('Result:', result)
-						out.innerText = JSON.stringify(result, null, 2)
+						if (result instanceof Decimal || result instanceof Rational) {
+							console.log(`Result: ${result}`)
+							out.innerText = result.toString()
+						} else {
+							console.log('Result:', result)
+							out.innerText = JSON.stringify(result, null, 2)
+						}
 					} catch (e) {
 						console.error(e)
 						out.innerText = e + ''

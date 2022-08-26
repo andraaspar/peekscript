@@ -1,10 +1,16 @@
+import { toInt } from '../fun/toInt'
+import { toNumber } from '../fun/toNumber'
+import { DECIMAL_REGEX } from '../model/constants'
+import { INumberFn } from '../model/INumberFn'
+import { TNumber } from '../model/TNumber'
 import { Rational } from './Rational'
 
-export class Decimal {
+export class Decimal implements INumberFn {
 	#value: bigint
 	#decimalPlaces: number
 
-	constructor(value: bigint, decimalPlaces: number) {
+	constructor(value: bigint, decimalPlaces: TNumber) {
+		decimalPlaces = toInt(decimalPlaces)
 		if (decimalPlaces < 0) {
 			throw new Error(
 				`[rgt6p0] Expected decimal places to be equal to or greater than 0, got: ${decimalPlaces}`,
@@ -30,23 +36,25 @@ export class Decimal {
 		return this.#decimalPlaces
 	}
 
-	toNumber() {
-		const s = this.toString()
+	toNumber(precision?: TNumber) {
+		const src = precision == null ? this : this.toDecimal(precision)
+		const s = src.toFixed(precision)
 		const result = parseFloat(s)
-		const other = Decimal.fromNumber(result)
-		if (!this.isEqualTo(other)) {
+		const dest = Decimal.fromNumber(result)
+		if (!src.isEqualTo(dest)) {
 			throw new Error(
-				`[rgtd70] Cannot convert RoughNum to number: ${s} != ${other}`,
+				`[rgtd70] Cannot convert Decimal to number: ${src} != ${dest}`,
 			)
 		}
 		return result
 	}
 
-	toDecimalPlaces(decimalPlaces: number) {
+	toDecimal(decimalPlaces: TNumber) {
+		decimalPlaces = toInt(decimalPlaces)
 		if (decimalPlaces < this.#decimalPlaces) {
 			let value =
-				this.#value * 10n ** BigInt(decimalPlaces - this.#decimalPlaces + 1)
-			if (value > 0) {
+				this.#value / 10n ** BigInt(this.#decimalPlaces - decimalPlaces - 1)
+			if (value >= 0n) {
 				if (value % 10n >= 5n) {
 					value += 10n
 				}
@@ -61,13 +69,14 @@ export class Decimal {
 		}
 	}
 
-	toString(precision?: number) {
+	toString(precision?: TNumber) {
 		return this.toFixed(precision).replace(/\.0*$|(\..*?[1-9])0+$/, '$1')
 	}
 
-	toFixed(precision: number = this.#decimalPlaces): string {
+	toFixed(precision: TNumber = this.#decimalPlaces): string {
+		precision = toInt(precision)
 		if (precision < this.#decimalPlaces) {
-			return this.toDecimalPlaces(precision).toFixed(precision)
+			return this.toDecimal(precision).toFixed(precision)
 		}
 		let valueString = (this.#value < 0 ? -this.#value : this.#value)
 			.toString()
@@ -84,6 +93,9 @@ export class Decimal {
 	}
 
 	static fromString(s: string): Decimal {
+		if (!DECIMAL_REGEX.test(s)) {
+			throw new Error(`[rh86ww] Unsupported Decimal string: ${s}`)
+		}
 		if (s.includes('e')) {
 			const [baseString, expString] = s.split('e')
 			const base = Decimal.fromString(baseString)
@@ -99,7 +111,14 @@ export class Decimal {
 		}
 	}
 
-	static fromNumber(n: number): Decimal {
+	static fromNumber(n: TNumber): Decimal {
+		n = toNumber(n)
+		if (isNaN(n)) {
+			throw new Error(`[rh87bq] NaN cannot be converted to Decimal.`)
+		}
+		if (!isFinite(n)) {
+			throw new Error(`[rh87ct] Infinity cannot be converted to Decimal.`)
+		}
 		return this.fromString(n.toString())
 	}
 
@@ -168,7 +187,7 @@ export class Decimal {
 		)
 	}
 
-	dividedBy(other: Decimal, precision: number) {
+	dividedBy(other: Decimal, precision: TNumber) {
 		return this.toRational().dividedBy(other.toRational()).toDecimal(precision)
 	}
 

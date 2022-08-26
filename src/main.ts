@@ -1,4 +1,6 @@
 export { CachedEvaluator } from './class/CachedEvaluator'
+export { Decimal } from './class/Decimal'
+export { Rational } from './class/Rational'
 export { evaluate } from './fun/evaluate'
 export { evaluateAst } from './fun/evaluateAst'
 export { findIdentifiers } from './fun/findIdentifiers'

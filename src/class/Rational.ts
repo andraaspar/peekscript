@@ -1,6 +1,11 @@
+import { toInt } from '../fun/toInt'
+import { toNumber } from '../fun/toNumber'
+import { DECIMAL_REGEX } from '../model/constants'
+import { INumberFn } from '../model/INumberFn'
+import { TNumber } from '../model/TNumber'
 import { Decimal } from './Decimal'
 
-export class Rational {
+export class Rational implements INumberFn {
 	#numerator: bigint
 	#denominator: bigint
 	#signMultiplier: bigint
@@ -85,7 +90,14 @@ export class Rational {
 		return this.isGreaterThan(other) || this.isEqualTo(other)
 	}
 
-	static fromNumber(n: number): Rational {
+	static fromNumber(n: TNumber): Rational {
+		n = toNumber(n)
+		if (isNaN(n)) {
+			throw new Error(`[rh8fes] NaN cannot be converted to Rational.`)
+		}
+		if (!isFinite(n)) {
+			throw new Error(`[rh8feu] Infinity cannot be converted to Rational.`)
+		}
 		const signMultiplier = n < 0 ? -1n : 1n
 		let positiveN = Math.abs(n)
 		const fractionPart = positiveN % 1
@@ -106,8 +118,19 @@ export class Rational {
 	}
 
 	static fromString(s: string): Rational {
-		const [numerator, denominator = ''] = s.split('/')
-		return new Rational(BigInt(numerator), BigInt(denominator))
+		if (/^[-+]?\d+\/[-+]?\d+$/.test(s)) {
+			const [numerator, denominator = ''] = s.split('/')
+			return new Rational(BigInt(numerator), BigInt(denominator))
+		} else if (DECIMAL_REGEX.test(s)) {
+			if (s.includes('e')) {
+				const [baseStr, expStr] = s.split('e')
+				const base = Decimal.fromString(baseStr).toRational()
+				return base.toThePowerOf(Decimal.fromString(expStr).toRational())
+			} else {
+				return Decimal.fromString(s).toRational()
+			}
+		}
+		throw new Error(`[rh8f5b] Unsupported Rational string: ${s}`)
 	}
 
 	#gcd(a: bigint, b: bigint): bigint {
@@ -122,7 +145,7 @@ export class Rational {
 		}
 	}
 
-	toFractionString() {
+	toString() {
 		const sign = this.isNegative ? '-' : ''
 		if (this.#denominator === 1n) {
 			return sign + this.#numerator
@@ -131,11 +154,12 @@ export class Rational {
 		}
 	}
 
-	toString(precision?: number): string {
+	toDecimalString(precision: TNumber): string {
 		return this.toFixed(precision).replace(/\.0*$|(\..*?[1-9])0+$/, '$1')
 	}
 
-	toFixed(precision: number = 20): string {
+	toFixed(precision: TNumber): string {
+		precision = toInt(precision)
 		const sign = this.isNegative ? '-' : ''
 		const remaining = this.#numerator % this.#denominator
 		if (remaining) {
@@ -159,13 +183,22 @@ export class Rational {
 		}
 	}
 
-	toDecimal(precision: number) {
+	toDecimal(precision: TNumber) {
+		precision = toInt(precision)
 		return new Decimal(
 			(this.#signMultiplier *
 				(this.#numerator * 10n ** BigInt(precision + 1))) /
 				this.#denominator,
 			precision + 1,
-		).toDecimalPlaces(precision)
+		).toDecimal(precision)
+	}
+
+	toNumber(precision: TNumber) {
+		return this.toDecimal(precision).toNumber()
+	}
+
+	toRational() {
+		return this
 	}
 
 	negated(): Rational {

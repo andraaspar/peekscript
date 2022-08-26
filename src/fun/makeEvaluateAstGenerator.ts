@@ -16,7 +16,7 @@ export function* makeEvaluateAstGenerator(
 		case 'keyword':
 			return ast.value
 		case 'number':
-			return Decimal.fromString(ast.value)
+			return Rational.fromString(ast.value)
 		case 'string':
 			return ast.value
 		case 'unary': {
@@ -455,6 +455,12 @@ export function* makeEvaluateAstGenerator(
 				case 'string':
 					return r
 				case 'number':
+					if (isNaN(r)) {
+						throw new Error(`[rh8ea1] NaN is not a valid number.`)
+					}
+					if (!isFinite(r)) {
+						throw new Error(`[rh8ea3] Infinity is not a valid number.`)
+					}
 					return Rational.fromNumber(r)
 				case 'object':
 					if (r instanceof Rational) {
@@ -490,6 +496,12 @@ export function* makeEvaluateAstGenerator(
 				case 'string':
 					return r0
 				case 'number':
+					if (isNaN(r0)) {
+						throw new Error(`[rh8e8i] NaN is not a valid number.`)
+					}
+					if (!isFinite(r0)) {
+						throw new Error(`[rh8e96] Infinity is not a valid number.`)
+					}
 					return Rational.fromNumber(r0)
 				case 'object':
 					if (r0 instanceof Rational) {
