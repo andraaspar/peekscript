@@ -16,7 +16,7 @@
 		<div><pre id="ast-out"></pre>
 		</div>
 		<script type="module">
-			import { evaluateAst, parse, Decimal, Rational } from './src/main.ts'
+			import { evaluateAst, parse, Rational } from './src/main.ts'
 
 			const envIn = document.getElementById('env-in')
 			const code = document.getElementById('code')
@@ -30,15 +30,15 @@
 				try {
 					localStorage.setItem('peekscript-env', envIn.value)
 					localStorage.setItem('peekscript-code', code.value)
-					const env = new Map(Object.entries((new Function(`'use strict';const Rational=this.Rational;const Decimal=this.Decimal;return ({${envIn.value}})`)).apply({ Rational, Decimal })))
+					const env = new Map(Object.entries((new Function(`'use strict';const Rational=this.Rational;const env=({${envIn.value}});return env`)).apply({ Rational })))
 					const ast = parse(code.value)
 					console.log('AST:', ast)
 					astOut.innerText = JSON.stringify(ast, null, 2)
 					try {
 						const result = evaluateAst(ast, env)
-						if (result instanceof Decimal || result instanceof Rational) {
+						if (result instanceof Rational) {
 							console.log(`Result: ${result}`)
-							out.innerText = result.toString()
+							out.innerText = result.toDecimalString(8)
 						} else {
 							console.log('Result:', result)
 							out.innerText = JSON.stringify(result, null, 2)
