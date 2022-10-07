@@ -1,11 +1,9 @@
 import { toInt } from '../fun/toInt'
 import { toNumber } from '../fun/toNumber'
 import { DECIMAL_REGEX } from '../model/constants'
-import { INumberFn } from '../model/INumberFn'
 import { TNumber } from '../model/TNumber'
-import { Decimal } from './Decimal'
 
-export class Rational implements INumberFn {
+export class Rational {
 	#numerator: bigint
 	#denominator: bigint
 	#signMultiplier: bigint
@@ -123,11 +121,20 @@ export class Rational implements INumberFn {
 			return new Rational(BigInt(numerator), BigInt(denominator))
 		} else if (DECIMAL_REGEX.test(s)) {
 			if (s.includes('e')) {
-				const [baseStr, expStr] = s.split('e')
-				const base = Decimal.fromString(baseStr).toRational()
-				return base.toThePowerOf(Decimal.fromString(expStr).toRational())
+				const [baseString, expString] = s.split('e')
+				const base = Rational.fromString(baseString)
+				return base.multipliedBy(
+					new Rational(10n).toThePowerOf(Rational.fromString(expString)),
+				)
 			} else {
-				return Decimal.fromString(s).toRational()
+				const sepIndex = s.indexOf('.')
+				if (sepIndex < 0) {
+					return new Rational(BigInt(s))
+				}
+				return new Rational(
+					BigInt(s.replace('.', '')),
+					10n ** BigInt(s.length - 1 - sepIndex),
+				)
 			}
 		}
 		throw new Error(`[rh8f5b] Unsupported Rational string: ${s}`)
@@ -160,41 +167,51 @@ export class Rational implements INumberFn {
 
 	toFixed(precision: TNumber): string {
 		precision = toInt(precision)
-		const sign = this.isNegative ? '-' : ''
-		const remaining = this.#numerator % this.#denominator
-		if (remaining) {
-			const remainingToPow = remaining * 10n ** BigInt(precision + 1)
-			const remainingString = (
-				remainingToPow / this.#denominator +
-				''
-			).padStart(precision + 1, '0')
-			return (
-				sign +
-				this.#numerator / this.#denominator +
-				'.' +
-				remainingString
-			).replace(/(\d)\.?(\d)$/, (_, last, afterLast) =>
-				parseInt(afterLast, 10) >= 5 ? parseInt(last, 10) + 1 + '' : last,
-			)
-		} else {
-			return (
-				sign + this.#numerator / this.#denominator + '.'.padEnd(precision, '0')
-			)
-		}
-	}
 
-	toDecimal(precision: TNumber) {
-		precision = toInt(precision)
-		return new Decimal(
+		// Divide
+		let value =
 			(this.#signMultiplier *
 				(this.#numerator * 10n ** BigInt(precision + 1))) /
-				this.#denominator,
-			precision + 1,
-		).toDecimal(precision)
+			this.#denominator
+
+		// Round
+		if (value >= 0n) {
+			// Positive
+			if (value % 10n >= 5n) {
+				value += 10n
+			}
+		} else {
+			// Negative
+			if (value % 10n <= -5n) {
+				value -= 10n
+			}
+		}
+		value = value / 10n
+
+		// Stringify
+		let valueString = (value < 0 ? -value : value)
+			.toString()
+			.padStart(precision + 1, '0')
+		const splitPoint = Math.max(0, valueString.length - precision)
+		const wholePart =
+			(value < 0n ? '-' : '') + (valueString.slice(0, splitPoint) || '0')
+		const fractionPart = valueString.slice(splitPoint)
+		return fractionPart ? wholePart + '.' + fractionPart : wholePart
 	}
 
 	toNumber(precision: TNumber) {
-		return this.toDecimal(precision).toNumber()
+		let valueString = this.toFixed(precision)
+		const result = parseFloat(valueString)
+
+		// Test
+		const dest = Rational.fromNumber(result)
+		if (!this.isEqualTo(dest)) {
+			throw new Error(
+				`[rgtd70] Cannot convert Rational to number: ${this} != ${dest}`,
+			)
+		}
+
+		return result
 	}
 
 	toRational() {
@@ -253,34 +270,6 @@ export class Rational implements INumberFn {
 		)
 	}
 
-	// 	function rootNth(val, k=2n) {
-	//     let o = 0n; // old approx value
-	//     let x = val;
-	//     let limit = 100;
-
-	//     while(x**k!==k && x!==o && --limit) {
-	//       o=x;
-	//       x = ((k-1n)*x + val/x**(k-1n))/k;
-	//     }
-
-	//     return x;
-	// }
-
-	// #root(val: bigint, k: bigint): bigint {
-	// 	let prevN = 0n // old approx value
-	// 	let n = val
-	// 	let limit = 100
-	// 	while (n ** k !== k && n !== prevN) {
-	// 		if (--limit < 0) {
-	// 			throw new Error(`[rgt5gw] Root calculation too complex.`)
-	// 		}
-	// 		prevN = n
-	// 		n = ((k - 1n) * n + val / n ** (k - 1n)) / k
-	// 	}
-
-	// 	return n
-	// }
-
 	toThePowerOf(other: Rational) {
 		if (other.#denominator === 1n) {
 			if (other.isNegative) {
@@ -297,21 +286,6 @@ export class Rational implements INumberFn {
 				)
 			}
 		}
-		//  else if (other.#numerator === 1n) {
-		// 	if (other.isNegative) {
-		// 		return new ExactNum(
-		// 			this.#root(this.#denominator, other.#denominator),
-		// 			this.#root(this.#numerator, other.#denominator),
-		// 			this.#signMultiplier,
-		// 		)
-		// 	} else {
-		// 		return new ExactNum(
-		// 			this.#root(this.#numerator, other.#denominator),
-		// 			this.#root(this.#denominator, other.#denominator),
-		// 			this.#signMultiplier,
-		// 		)
-		// 	}
-		// }
 		throw new Error(
 			`[rgpz5u] Exponentiation not implemented for: ${other.toString()}`,
 		)

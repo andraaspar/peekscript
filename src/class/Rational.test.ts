@@ -191,5 +191,9 @@ test(`[rgt64c]`, () => {
 })
 
 test(`[rgti5f]`, () => {
-	expect(Rational.fromString('-2/3').toDecimal(3).toString()).toBe('-0.667')
+	expect(Rational.fromString('-1/2').toDecimalString(3)).toBe('-0.5')
+})
+
+test(`[rjdui4]`, () => {
+	expect(Rational.fromString('1/4').toDecimalString(3)).toBe('0.25')
 })

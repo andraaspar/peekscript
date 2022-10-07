@@ -1,4 +1,3 @@
-import { Decimal } from '../class/Decimal'
 import { Rational } from '../class/Rational'
 import { TAssertType } from '../model/TAssertType'
 
@@ -11,11 +10,9 @@ import { TAssertType } from '../model/TAssertType'
 // export function getType(it: object): 'object'
 // export function getType(it: Function): 'function'
 // export function getType(it: Rational): 'rational'
-// export function getType(it: Decimal): 'decimal'
 // export function getType(it: null): 'null'
 export function getType(it: unknown): TAssertType {
 	if (it === null) return 'null'
 	if (it instanceof Rational) return 'rational'
-	if (it instanceof Decimal) return 'decimal'
 	return typeof it
 }
