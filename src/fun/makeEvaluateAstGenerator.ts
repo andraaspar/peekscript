@@ -147,6 +147,11 @@ export function* makeEvaluateAstGenerator(
 					if (typeof r0 === 'object' && typeof r1 === 'object') {
 						if (r0 instanceof Rational) {
 							if (r1 instanceof Rational) {
+								if (r1.isEqualTo(Rational.ZERO)) {
+									throw new Error(
+										`[rje7wl] Division by zero ${locationToString(ast.op)}`,
+									)
+								}
 								return r0.dividedBy(r1)
 							} else {
 								throw new Error(

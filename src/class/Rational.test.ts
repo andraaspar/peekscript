@@ -197,3 +197,7 @@ test(`[rgti5f]`, () => {
 test(`[rjdui4]`, () => {
 	expect(Rational.fromString('1/4').toDecimalString(3)).toBe('0.25')
 })
+
+test(`[rje83c]`, () => {
+	expect(new Rational(0n, 1n, -1n).isEqualTo(Rational.ZERO)).toBe(true)
+})

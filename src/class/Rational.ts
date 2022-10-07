@@ -4,6 +4,8 @@ import { DECIMAL_REGEX } from '../model/constants'
 import { TNumber } from '../model/TNumber'
 
 export class Rational {
+	static ZERO = new Rational(0n)
+
 	#numerator: bigint
 	#denominator: bigint
 	#signMultiplier: bigint
@@ -13,7 +15,7 @@ export class Rational {
 		denominator: bigint = 1n,
 		signMultiplier: bigint = 1n,
 	) {
-		this.#signMultiplier = signMultiplier < 0n ? -1n : 1n
+		this.#signMultiplier = signMultiplier < 0n && numerator !== 0n ? -1n : 1n
 		this.#numerator = BigInt(numerator)
 		if (this.#numerator < 0n) {
 			this.#signMultiplier = -this.#signMultiplier
