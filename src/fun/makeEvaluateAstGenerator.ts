@@ -1,3 +1,4 @@
+import { ILocation } from '../ast/ILocation'
 import { TExpression } from '../ast/TExpression'
 import { Rational } from '../class/Rational'
 import { TEnvMap } from '../model/TEnvMap'
@@ -266,27 +267,7 @@ export function* makeEvaluateAstGenerator(
 				params.push(yield* makeEvaluateAstGenerator(param, env))
 			}
 			const r = fn(...params)
-			switch (typeof r) {
-				case 'boolean':
-				case 'string':
-					return r
-				case 'number':
-					if (isNaN(r)) {
-						throw new Error(`[rh8ea1] NaN is not a valid number.`)
-					}
-					if (!isFinite(r)) {
-						throw new Error(`[rh8ea3] Infinity is not a valid number.`)
-					}
-					return Rational.fromNumber(r)
-				case 'object':
-					if (r instanceof Rational) {
-						return r
-					} else {
-						return null
-					}
-				default:
-					return null
-			}
+			return sanitizeResult(r, ast.identifier)
 		}
 		case 'grouping':
 			return yield* makeEvaluateAstGenerator(ast.expression, env)
@@ -299,37 +280,39 @@ export function* makeEvaluateAstGenerator(
 				)
 			}
 			const r0 = env.get(ast.value)
-			switch (typeof r0) {
-				case 'function':
-					throw new Error(
-						`[rgeqjw] Cannot use function as value: ${
-							ast.value
-						} ${locationToString(ast)}`,
-					)
-				case 'boolean':
-				case 'string':
-					return r0
-				case 'number':
-					if (isNaN(r0)) {
-						throw new Error(`[rh8e8i] NaN is not a valid number.`)
-					}
-					if (!isFinite(r0)) {
-						throw new Error(`[rh8e96] Infinity is not a valid number.`)
-					}
-					return Rational.fromNumber(r0)
-				case 'object':
-					if (r0 instanceof Rational) {
-						return r0
-					} else {
-						return null
-					}
-				default:
-					return null
-			}
+			return sanitizeResult(r0, ast)
 		}
 		case 'ternary':
 			return (yield* makeEvaluateAstGenerator(ast.check, env))
 				? yield* makeEvaluateAstGenerator(ast.then, env)
 				: yield* makeEvaluateAstGenerator(ast.else, env)
+	}
+}
+
+function sanitizeResult(result: unknown, location: ILocation): TOutValues {
+	switch (typeof result) {
+		case 'function':
+			throw new Error(
+				`[rgeqjw] Cannot use function as value: ${locationToString(location)}`,
+			)
+		case 'boolean':
+		case 'string':
+			return result
+		case 'number':
+			if (isNaN(result)) {
+				throw new Error(`[rh8e8i] NaN is not a valid number.`)
+			}
+			if (!isFinite(result)) {
+				throw new Error(`[rh8e96] Infinity is not a valid number.`)
+			}
+			return Rational.fromNumber(result)
+		case 'object':
+			if (result instanceof Rational) {
+				return result
+			} else {
+				return null
+			}
+		default:
+			return null
 	}
 }
