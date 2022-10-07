@@ -2,7 +2,8 @@
   const moo = require("moo")
 
   const lexer = moo.compile({
-    whitespace: { match: /[ \t]+/ },
+    string: /'(?:\\'|[^'])*'/,
+    number: /\d+(?:\.\d+)?(?:e[-+]\d+)?/,
     identifier: { match: /[$_a-zA-Z][$_a-zA-Z0-9]*/, type: moo.keywords({
       keyword: ['true', 'false', 'null']
     }) },
@@ -29,9 +30,9 @@
       ':',
       '(',
       ')',
+      '.',
     ],
-    number: /[0-9]+(?:\.[0-9]+)?/,
-    string: /'(?:\\'|[^'])*'/,
+    whitespace: { match: /[ \t]+/ },
   })
 %}
 
@@ -122,8 +123,6 @@ funcall ->
     {% data => ({ type: 'funcall', identifier: data[0], params: data[2] }) %}
   | grouping
     {% id %}
-  | value
-    {% id %}
 
 funparams ->
   "(" ( _ expression _ "," ):* (_ expression):? _ ")"
@@ -132,6 +131,8 @@ funparams ->
 grouping ->
   "(" _ expression _ ")"
     {% data => ({ type: 'grouping', expression: data[2] }) %}
+  | value
+    {% id %}
 
 value ->
   null_

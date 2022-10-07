@@ -93,6 +93,10 @@ test(`[rg1ecu]`, () => {
 	expect(unparse(parse(`3.14`))).toBe(`3.14`)
 })
 
+test(`[rje2b0]`, () => {
+	expect(unparse(parse(`3.14e+1`))).toBe(`3.14e+1`)
+})
+
 // ternary
 
 test(`[rg1j1b]`, () => {
