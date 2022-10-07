@@ -38,7 +38,7 @@
 						const result = evaluateAst(ast, env)
 						if (result instanceof Rational) {
 							console.log(`Result: ${result}`)
-							out.innerText = result.toDecimalString(8)
+							out.innerText = result.toString()
 						} else {
 							console.log('Result:', result)
 							out.innerText = JSON.stringify(result, null, 2)
