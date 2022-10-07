@@ -47,5 +47,7 @@ function findIdentifiersInternal(
 			findIdentifiersInternal(ast.then, identifiers)
 			findIdentifiersInternal(ast.else, identifiers)
 			break
+		default:
+			throw new Error(`[rje5t5] ${(ast as TExpression).type}`)
 	}
 }
