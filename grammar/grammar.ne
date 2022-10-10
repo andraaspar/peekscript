@@ -1,38 +1,45 @@
 @{%
   const moo = require("moo")
 
-  const lexer = moo.compile({
-    string: /'(?:\\'|[^'])*'/,
-    number: /\d+(?:\.\d+)?(?:e[-+]\d+)?/,
-    identifier: { match: /[$_a-zA-Z][$_a-zA-Z0-9]*/, type: moo.keywords({
-      keyword: ['true', 'false', 'null']
-    }) },
-    operator: [
-      '+',
-      '-',
-      '**',
-      '*',
-      '/',
-      '%',
-      '!=',
-      '<',
-      '<=',
-      '>',
-      '>=',
-      '==',
-      '!',
-      '??',
-      '?',
-      '||',
-      '&&',
-      // not in ast
-      ',',
-      ':',
-      '(',
-      ')',
-      '.',
-    ],
-    whitespace: { match: /[ \t]+/ },
+  const lexer = moo.states({
+    main: {
+      stringStart: { match: /'/, push: 'string' },
+      number: /\d+(?:\.\d+)?(?:e[-+]\d+)?/,
+      identifier: { match: /[$_a-zA-Z][$_a-zA-Z0-9]*/, type: moo.keywords({
+        keyword: ['true', 'false', 'null']
+      }) },
+      operator: [
+        '+',
+        '-',
+        '**',
+        '*',
+        '/',
+        '%',
+        '!=',
+        '<',
+        '<=',
+        '>',
+        '>=',
+        '==',
+        '!',
+        '??',
+        '?',
+        '||',
+        '&&',
+        // not in ast
+        ',',
+        ':',
+        '(',
+        ')',
+        '.',
+      ],
+      whitespace: { match: /[ \t]+/ },
+    },
+    string: {
+      stringEscape: /\\(?:u[a-fA-F0-9]{0,4}|[\\'nrt])?/,
+      stringEnd: { match: /'/, pop: 1 },
+      stringContent: { match: /[^']+/, lineBreaks: true },
+    }
   })
 %}
 
@@ -151,8 +158,46 @@ identifier ->
     {% id %}
 
 string ->
-  %string
-    {% data => ({ ...data[0], value: data[0].value.slice(1, -1) }) %}
+  %stringStart (%stringContent | %stringEscape):* %stringEnd
+    {% data => {
+      let lineBreaks = 0
+      let value = ''
+      let text = data[0].text
+      for (const [part] of data[1]) {
+        if (part.lineBreaks) {
+          lineBreaks += part.lineBreaks
+        }
+        text += part.text
+        if (part.type === 'stringContent') {
+          value += part.value
+        } else {
+          value += part.value.replace(/^\\(.*)$/, (match, letter) => {
+            switch (letter) {
+              case '\\': return '\\'
+              case "'": return "'"
+              case 'n': return '\n'
+              case 'r': return '\r'
+              case 't': return '\t'
+              default:
+                if (/u[a-f0-9]{4}/i.test(letter)) {
+                  return String.fromCharCode(parseInt(letter.slice(1), 16))
+                }
+                throw new Error(`[rjj9tt] Invalid escape sequence: ${match} @ line ${part.line} col ${part.col}`)
+            }
+          })
+        }
+      }
+      text += data[2].text
+      return {
+        type: 'string',
+        offset: data[0].offset,
+        line: data[0].line,
+        col: data[0].col,
+        lineBreaks,
+        value,
+        text,
+      }
+    } %}
 
 number ->
   %number

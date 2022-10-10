@@ -83,6 +83,32 @@ test(`[rg1e8p] Literal newline:`, () => {
 	expect(unparse(parse(`'\n'`))).toBe(`'\n'`)
 })
 
+test(`[rjjbqs] Escaped newline:`, () => {
+	expect(unparse(parse(String.raw`'\n'`))).toBe(String.raw`'\n'`)
+})
+
+test(`[rjjbp8]`, () => {
+	expect(unparse(parse(String.raw`'\r'`))).toBe(String.raw`'\r'`)
+})
+
+test(`[rjjbsu]`, () => {
+	expect(unparse(parse(String.raw`'\t'`))).toBe(String.raw`'\t'`)
+})
+
+test(`[rjjbz2]`, () => {
+	expect(unparse(parse(String.raw`'foo\tbar'`))).toBe(String.raw`'foo\tbar'`)
+})
+
+test(`[rjjbtn]`, () => {
+	expect(unparse(parse(String.raw`'\u00a0'`))).toBe(String.raw`'\u00a0'`)
+})
+
+test(`[rjjbzl]`, () => {
+	expect(unparse(parse(String.raw`'foo\u00a0bar'`))).toBe(
+		String.raw`'foo\u00a0bar'`,
+	)
+})
+
 // number
 
 test(`[rg181v]`, () => {
