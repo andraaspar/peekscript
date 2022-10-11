@@ -40,12 +40,76 @@ test(`[rgel03]`, () => {
 	expect(evaluate(`a`, envMapFrom({ a: 3.1 }))?.toString()).toBe('31/10')
 })
 
+test(`[rjldq2]`, () => {
+	expect(() => evaluate(`a`, envMapFrom({ a: NaN }))).toThrow(/nan/i)
+})
+
+test(`[rjldrq]`, () => {
+	expect(() => evaluate(`a`, envMapFrom({ a: Infinity }))).toThrow(/infinity/i)
+})
+
 test(`[rgelim]`, () => {
 	expect(() => evaluate(`fn`, envMapFrom({}))).toThrow(/defined/i)
 })
 
 test(`[rgelre]`, () => {
 	expect(evaluate(`5+2`, envMapFrom({}))?.toString()).toBe('7')
+})
+
+test(`[rgelre]`, () => {
+	expect(() => evaluate(`5+null`, envMapFrom({}))).toThrow(/rational/i)
+})
+
+test(`[rjld34]`, () => {
+	expect(() => evaluate(`null+null`, envMapFrom({}))).toThrow(/rational/i)
+})
+
+test(`[rjld4k]`, () => {
+	expect(() => evaluate(`true+false`, envMapFrom({}))).toThrow(/invalid/i)
+})
+
+test(`[rjld59]`, () => {
+	expect(() => evaluate(`5-null`, envMapFrom({}))).toThrow(/rational/i)
+})
+
+test(`[rjld5s]`, () => {
+	expect(() => evaluate(`true-true`, envMapFrom({}))).toThrow(/rational/i)
+})
+
+test(`[rjld7n]`, () => {
+	expect(() => evaluate(`5*null`, envMapFrom({}))).toThrow(/rational/i)
+})
+
+test(`[rjld7p]`, () => {
+	expect(() => evaluate(`true*true`, envMapFrom({}))).toThrow(/rational/i)
+})
+
+test(`[rjld8p]`, () => {
+	expect(() => evaluate(`1/0`, envMapFrom({}))).toThrow(/zero/i)
+})
+
+test(`[rjld9o]`, () => {
+	expect(() => evaluate(`5/null`, envMapFrom({}))).toThrow(/rational/i)
+})
+
+test(`[rjld9q]`, () => {
+	expect(() => evaluate(`true/true`, envMapFrom({}))).toThrow(/rational/i)
+})
+
+test(`[rjldap]`, () => {
+	expect(() => evaluate(`5%null`, envMapFrom({}))).toThrow(/rational/i)
+})
+
+test(`[rjldar]`, () => {
+	expect(() => evaluate(`true%true`, envMapFrom({}))).toThrow(/rational/i)
+})
+
+test(`[rjlcoe]`, () => {
+	expect(() => evaluate(`+true`, envMapFrom({}))).toThrow(/rational/i)
+})
+
+test(`[rjlcu2]`, () => {
+	expect(() => evaluate(`-true`, envMapFrom({}))).toThrow(/rational/i)
 })
 
 test(`[rgeluc]`, () => {
@@ -78,6 +142,10 @@ test(`[rgelxp]`, () => {
 
 test(`[rgen4d]`, () => {
 	expect(evaluate(`1!=2`, envMapFrom({}))).toBe(true)
+})
+
+test(`[rjldbw]`, () => {
+	expect(evaluate(`null!=0`, envMapFrom({}))).toBe(true)
 })
 
 test(`[rgen4f]`, () => {
@@ -185,6 +253,10 @@ test(`[rgpf7r]`, () => {
 	expect(evaluate(`!true`, envMapFrom({}))).toBe(false)
 })
 
+test(`[rjlclt]`, () => {
+	expect(() => evaluate(`!0`, envMapFrom({}))).toThrow(/boolean/i)
+})
+
 test(`[rgpf93]`, () => {
 	expect(evaluate(`true && true`, envMapFrom({}))).toBe(true)
 })
@@ -213,12 +285,28 @@ test(`[rgpfdg]`, () => {
 	expect(evaluate(`2**2`, envMapFrom({}))?.toString()).toBe('4')
 })
 
+test(`[rjlcx3]`, () => {
+	expect(() => evaluate(`2**null`, envMapFrom({}))).toThrow(/rational/i)
+})
+
+test(`[rjlcy7]`, () => {
+	expect(() => evaluate(`true**2`, envMapFrom({}))).toThrow(/rational/i)
+})
+
 test(`[rgpfet]`, () => {
 	expect(evaluate(`1<2`, envMapFrom({}))).toBe(true)
 })
 
 test(`[rgpff6]`, () => {
 	expect(evaluate(`2<2`, envMapFrom({}))).toBe(false)
+})
+
+test(`[rjlddh]`, () => {
+	expect(() => evaluate(`2<null`, envMapFrom({}))).toThrow(/rational/i)
+})
+
+test(`[rjlddk]`, () => {
+	expect(() => evaluate(`true<2`, envMapFrom({}))).toThrow(/rational/i)
 })
 
 test(`[rgpffh]`, () => {
@@ -229,6 +317,14 @@ test(`[rgpffh]`, () => {
 	expect(evaluate(`3<=2`, envMapFrom({}))).toBe(false)
 })
 
+test(`[rjldex]`, () => {
+	expect(() => evaluate(`2<=null`, envMapFrom({}))).toThrow(/rational/i)
+})
+
+test(`[rjldez]`, () => {
+	expect(() => evaluate(`true<=2`, envMapFrom({}))).toThrow(/rational/i)
+})
+
 test(`[rgpfga]`, () => {
 	expect(evaluate(`2>1`, envMapFrom({}))).toBe(true)
 })
@@ -237,12 +333,28 @@ test(`[rgpfgm]`, () => {
 	expect(evaluate(`2>2`, envMapFrom({}))).toBe(false)
 })
 
+test(`[rjldfi]`, () => {
+	expect(() => evaluate(`2>null`, envMapFrom({}))).toThrow(/rational/i)
+})
+
+test(`[rjldfk]`, () => {
+	expect(() => evaluate(`true>2`, envMapFrom({}))).toThrow(/rational/i)
+})
+
 test(`[rgpfgz]`, () => {
 	expect(evaluate(`2>=2`, envMapFrom({}))).toBe(true)
 })
 
 test(`[rgpfhc]`, () => {
 	expect(evaluate(`2>=3`, envMapFrom({}))).toBe(false)
+})
+
+test(`[rjldfr]`, () => {
+	expect(() => evaluate(`2>=null`, envMapFrom({}))).toThrow(/rational/i)
+})
+
+test(`[rjldfu]`, () => {
+	expect(() => evaluate(`true>=2`, envMapFrom({}))).toThrow(/rational/i)
 })
 
 test(`[rgpfif]`, () => {

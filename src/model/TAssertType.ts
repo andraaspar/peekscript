@@ -9,6 +9,7 @@ export type TAssertType =
 	| 'object'
 	| 'function'
 	// Extras
+	| 'jsbi'
 	| 'null'
 	| 'rational'
 	| 'decimal'

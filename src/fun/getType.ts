@@ -1,3 +1,4 @@
+import JSBI from 'jsbi'
 import { Rational } from '../class/Rational'
 import { TAssertType } from '../model/TAssertType'
 
@@ -10,9 +11,14 @@ import { TAssertType } from '../model/TAssertType'
 // export function getType(it: object): 'object'
 // export function getType(it: Function): 'function'
 // export function getType(it: Rational): 'rational'
+// export function getType(it: JSBI): 'jsbi'
 // export function getType(it: null): 'null'
 export function getType(it: unknown): TAssertType {
-	if (it === null) return 'null'
-	if (it instanceof Rational) return 'rational'
-	return typeof it
+	const t = typeof it
+	if (t === 'object') {
+		if (it === null) return 'null'
+		if (it instanceof Rational) return 'rational'
+		if (it instanceof JSBI) return 'jsbi'
+	}
+	return t
 }

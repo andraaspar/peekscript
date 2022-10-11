@@ -1,39 +1,46 @@
+import JSBI from 'jsbi'
 import { Rational } from './Rational'
 
 test(`[rgph47]`, () => {
-	expect(new Rational(1n, 3n).toFixed(3)).toBe('0.333')
+	expect(new Rational(JSBI.BigInt(1), JSBI.BigInt(3)).toFixed(3)).toBe('0.333')
 })
 
 test(`[rgphbz]`, () => {
-	expect(new Rational(2n, 3n).toFixed(3)).toBe('0.667')
+	expect(new Rational(JSBI.BigInt(2), JSBI.BigInt(3)).toFixed(3)).toBe('0.667')
 })
 
 test(`[rgph89]`, () => {
-	expect(new Rational(5n, 100n).toFixed(3)).toBe('0.050')
+	expect(new Rational(JSBI.BigInt(5), JSBI.BigInt(100)).toFixed(3)).toBe(
+		'0.050',
+	)
 })
 
 test(`[rgpij1]`, () => {
-	expect(new Rational(-1n, 20n).toFixed(3)).toBe('-0.050')
+	expect(new Rational(JSBI.BigInt(-1), JSBI.BigInt(20)).toFixed(3)).toBe(
+		'-0.050',
+	)
 })
 
 test(`[rgpkhq]`, () => {
-	expect(new Rational(2n, 8n).toString()).toBe('1/4')
+	expect(new Rational(JSBI.BigInt(2), JSBI.BigInt(8)).toString()).toBe('1/4')
 })
 
 test(`[rgplld]`, () => {
-	expect(new Rational(-2n, 8n).toString()).toBe('-1/4')
+	expect(new Rational(JSBI.BigInt(-2), JSBI.BigInt(8)).toString()).toBe('-1/4')
 })
 
 test(`[rgpllw]`, () => {
-	expect(new Rational(2n, -8n).toString()).toBe('-1/4')
+	expect(new Rational(JSBI.BigInt(2), JSBI.BigInt(-8)).toString()).toBe('-1/4')
 })
 
 test(`[rgplmb]`, () => {
-	expect(new Rational(-2n, -8n).toString()).toBe('1/4')
+	expect(new Rational(JSBI.BigInt(-2), JSBI.BigInt(-8)).toString()).toBe('1/4')
 })
 
 test(`[rgplny]`, () => {
-	expect(new Rational(714n, 85n).toString()).toBe('42/5')
+	expect(new Rational(JSBI.BigInt(714), JSBI.BigInt(85)).toString()).toBe(
+		'42/5',
+	)
 })
 
 test(`[rgppns]`, () => {
@@ -53,41 +60,57 @@ test(`[rgpqj2]`, () => {
 })
 
 test(`[rgppwa]`, () => {
-	expect(() => new Rational(1n, 0n)).toThrow(/division/i)
+	expect(() => new Rational(JSBI.BigInt(1), JSBI.BigInt(0))).toThrow(
+		/division/i,
+	)
 })
 
 test(`[rgppzs]`, () => {
-	expect(new Rational(1n, 4n).isEqualTo(Rational.fromNumber(0.25))).toBe(true)
+	expect(
+		new Rational(JSBI.BigInt(1), JSBI.BigInt(4)).isEqualTo(
+			Rational.fromNumber(0.25),
+		),
+	).toBe(true)
 })
 
 test(`[rgpq2d]`, () => {
-	expect(new Rational(3n, 2n).toFixed(0)).toBe('2')
+	expect(new Rational(JSBI.BigInt(3), JSBI.BigInt(2)).toFixed(0)).toBe('2')
 })
 
 test(`[rgpqh0]`, () => {
-	expect(new Rational(-3n, 2n).toFixed(0)).toBe('-2')
+	expect(new Rational(JSBI.BigInt(-3), JSBI.BigInt(2)).toFixed(0)).toBe('-2')
 })
 
 test(`[rgprdd]`, () => {
-	expect(new Rational(1n, 4n).plus(new Rational(2n, 8n)).toString()).toBe('1/2')
+	expect(
+		new Rational(JSBI.BigInt(1), JSBI.BigInt(4))
+			.plus(new Rational(JSBI.BigInt(2), JSBI.BigInt(8)))
+			.toString(),
+	).toBe('1/2')
 })
 
 test(`[rgprf3]`, () => {
-	expect(new Rational(1n, 4n).plus(new Rational(-3n, 8n)).toString()).toBe(
-		'-1/8',
-	)
+	expect(
+		new Rational(JSBI.BigInt(1), JSBI.BigInt(4))
+			.plus(new Rational(JSBI.BigInt(-3), JSBI.BigInt(8)))
+			.toString(),
+	).toBe('-1/8')
 })
 
 test(`[rgprgb]`, () => {
-	expect(new Rational(-1n, 4n).plus(new Rational(3n, 8n)).toString()).toBe(
-		'1/8',
-	)
+	expect(
+		new Rational(JSBI.BigInt(-1), JSBI.BigInt(4))
+			.plus(new Rational(JSBI.BigInt(3), JSBI.BigInt(8)))
+			.toString(),
+	).toBe('1/8')
 })
 
 test(`[rgprgx]`, () => {
-	expect(new Rational(-1n, 4n).plus(new Rational(-2n, 8n)).toString()).toBe(
-		'-1/2',
-	)
+	expect(
+		new Rational(JSBI.BigInt(-1), JSBI.BigInt(4))
+			.plus(new Rational(JSBI.BigInt(-2), JSBI.BigInt(8)))
+			.toString(),
+	).toBe('-1/2')
 })
 
 test(`[rgprie]`, () => {
@@ -97,93 +120,147 @@ test(`[rgprie]`, () => {
 })
 
 test(`[rgprxn]`, () => {
-	expect(new Rational(1n, 2n).minus(new Rational(1n, 4n)).toString()).toBe(
-		'1/4',
-	)
+	expect(
+		new Rational(JSBI.BigInt(1), JSBI.BigInt(2))
+			.minus(new Rational(JSBI.BigInt(1), JSBI.BigInt(4)))
+			.toString(),
+	).toBe('1/4')
 })
 
 test(`[rgps09]`, () => {
-	expect(new Rational(1n, 2n).minus(new Rational(-1n, 4n)).toString()).toBe(
-		'3/4',
-	)
+	expect(
+		new Rational(JSBI.BigInt(1), JSBI.BigInt(2))
+			.minus(new Rational(JSBI.BigInt(-1), JSBI.BigInt(4)))
+			.toString(),
+	).toBe('3/4')
 })
 
 test(`[rgps0b]`, () => {
 	expect(
-		new Rational(1n, 2n).multipliedBy(new Rational(1n, 2n)).toString(),
+		new Rational(JSBI.BigInt(1), JSBI.BigInt(2))
+			.multipliedBy(new Rational(JSBI.BigInt(1), JSBI.BigInt(2)))
+			.toString(),
 	).toBe('1/4')
 })
 
 test(`[rgps1e]`, () => {
 	expect(
-		new Rational(1n, 2n).multipliedBy(new Rational(-1n, 2n)).toString(),
+		new Rational(JSBI.BigInt(1), JSBI.BigInt(2))
+			.multipliedBy(new Rational(JSBI.BigInt(-1), JSBI.BigInt(2)))
+			.toString(),
 	).toBe('-1/4')
 })
 
 test(`[rgps1v]`, () => {
-	expect(new Rational(1n, 2n).dividedBy(new Rational(1n, 4n)).toString()).toBe(
-		'2',
-	)
+	expect(
+		new Rational(JSBI.BigInt(1), JSBI.BigInt(2))
+			.dividedBy(new Rational(JSBI.BigInt(1), JSBI.BigInt(4)))
+			.toString(),
+	).toBe('2')
 })
 
-test(`[rgps4n]`, () => {
-	expect(new Rational(1n, 2n).dividedBy(new Rational(-1n, 4n)).toString()).toBe(
-		'-2',
-	)
+test(`[rgpsJSBI.BigInt(4)]`, () => {
+	expect(
+		new Rational(JSBI.BigInt(1), JSBI.BigInt(2))
+			.dividedBy(new Rational(JSBI.BigInt(-1), JSBI.BigInt(4)))
+			.toString(),
+	).toBe('-2')
 })
 
 test(`[rgps64]`, () => {
-	expect(new Rational(1n, 8n).isLessThan(new Rational(1n, 4n))).toBe(true)
+	expect(
+		new Rational(JSBI.BigInt(1), JSBI.BigInt(8)).isLessThan(
+			new Rational(JSBI.BigInt(1), JSBI.BigInt(4)),
+		),
+	).toBe(true)
 })
 
 test(`[rgpuek]`, () => {
-	expect(new Rational(1n, 8n).isLessThan(new Rational(-1n, 4n))).toBe(false)
+	expect(
+		new Rational(JSBI.BigInt(1), JSBI.BigInt(8)).isLessThan(
+			new Rational(JSBI.BigInt(-1), JSBI.BigInt(4)),
+		),
+	).toBe(false)
 })
 
 test(`[rgpufw]`, () => {
-	expect(new Rational(1n, 4n).isGreaterThan(new Rational(1n, 8n))).toBe(true)
+	expect(
+		new Rational(JSBI.BigInt(1), JSBI.BigInt(4)).isGreaterThan(
+			new Rational(JSBI.BigInt(1), JSBI.BigInt(8)),
+		),
+	).toBe(true)
 })
 
 test(`[rgpuh0]`, () => {
-	expect(new Rational(-1n, 4n).isGreaterThan(new Rational(1n, 8n))).toBe(false)
+	expect(
+		new Rational(JSBI.BigInt(-1), JSBI.BigInt(4)).isGreaterThan(
+			new Rational(JSBI.BigInt(1), JSBI.BigInt(8)),
+		),
+	).toBe(false)
 })
 
 test(`[rgpvc5]`, () => {
-	expect(new Rational(3n).toThePowerOf(new Rational(2n)).toString()).toBe('9')
+	expect(
+		new Rational(JSBI.BigInt(3))
+			.toThePowerOf(new Rational(JSBI.BigInt(2)))
+			.toString(),
+	).toBe('9')
 })
 
 test(`[rgpytk]`, () => {
-	expect(new Rational(5n).toThePowerOf(new Rational(3n)).toString()).toBe('125')
+	expect(
+		new Rational(JSBI.BigInt(5))
+			.toThePowerOf(new Rational(JSBI.BigInt(3)))
+			.toString(),
+	).toBe('125')
 })
 
 test(`[rgsz02]`, () => {
-	expect(new Rational(2n, 3n).toThePowerOf(new Rational(2n)).toString()).toBe(
-		'4/9',
-	)
+	expect(
+		new Rational(JSBI.BigInt(2), JSBI.BigInt(3))
+			.toThePowerOf(new Rational(JSBI.BigInt(2)))
+			.toString(),
+	).toBe('4/9')
 })
 
 test(`[rgsz2d]`, () => {
-	expect(new Rational(5n).toThePowerOf(new Rational(-2n)).toString()).toBe(
-		'1/25',
-	)
+	expect(
+		new Rational(JSBI.BigInt(5))
+			.toThePowerOf(new Rational(JSBI.BigInt(-2)))
+			.toString(),
+	).toBe('1/25')
 })
 
 test(`[rgszbw]`, () => {
-	expect(new Rational(5n).toThePowerOf(new Rational(0n)).toString()).toBe('1')
+	expect(
+		new Rational(JSBI.BigInt(5))
+			.toThePowerOf(new Rational(JSBI.BigInt(0)))
+			.toString(),
+	).toBe('1')
 })
 
 test(`[rgszbw]`, () => {
-	expect(new Rational(5n).toThePowerOf(new Rational(1n)).toString()).toBe('5')
+	expect(
+		new Rational(JSBI.BigInt(5))
+			.toThePowerOf(new Rational(JSBI.BigInt(1)))
+			.toString(),
+	).toBe('5')
 })
 
 test(`[rgpw5t]`, () => {
-	expect(() => new Rational(25n).toThePowerOf(new Rational(1n, 2n))).toThrow(
-		/implemented/i,
-	)
+	expect(() =>
+		new Rational(JSBI.BigInt(25)).toThePowerOf(
+			new Rational(JSBI.BigInt(1), JSBI.BigInt(2)),
+		),
+	).toThrow(/implemented/i)
 })
 
 test(`[rgt403]`, () => {
-	expect(new Rational(10n).remainder(new Rational(7n)).toString()).toBe('3')
+	expect(
+		new Rational(JSBI.BigInt(10))
+			.remainder(new Rational(JSBI.BigInt(7)))
+			.toString(),
+	).toBe('3')
 })
 
 test(`[rgt64c]`, () => {
@@ -198,6 +275,34 @@ test(`[rjdui4]`, () => {
 	expect(Rational.fromString('1/4').toDecimalString(3)).toBe('0.25')
 })
 
+test(`[rjlbvg]`, () => {
+	expect(Rational.fromString('3.14').toDecimalString(3)).toBe('3.14')
+})
+
+test(`[rjlbxc]`, () => {
+	expect(Rational.fromString('3e+3').toDecimalString(3)).toBe('3000')
+})
+
+test(`[rjlbxc]`, () => {
+	expect(Rational.fromString('1e-3').toDecimalString(3)).toBe('0.001')
+})
+
 test(`[rje83c]`, () => {
-	expect(new Rational(0n, 1n, -1n).isEqualTo(Rational.ZERO)).toBe(true)
+	expect(
+		new Rational(JSBI.BigInt(0), JSBI.BigInt(1), JSBI.BigInt(-1)).isEqualTo(
+			Rational.ZERO,
+		),
+	).toBe(true)
+})
+
+test(`[rjlc08]`, () => {
+	expect(
+		new Rational(JSBI.BigInt(1), JSBI.BigInt(2), JSBI.BigInt(1)).toNumber(3),
+	).toBe(0.5)
+})
+
+test(`[rjlc3p]`, () => {
+	expect(() =>
+		new Rational(JSBI.BigInt(1), JSBI.BigInt(3), JSBI.BigInt(1)).toNumber(3),
+	).toThrow(/convert/)
 })

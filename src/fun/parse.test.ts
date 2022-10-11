@@ -291,15 +291,15 @@ test(`[rg1l5k]`, () => {
 	expect(() => parse(`1??2||3`)).toThrow(/syntax/i)
 })
 
-test(`[rg1nrb]`, () => {
+test(`[rgJSBI.BigInt(1)rb]`, () => {
 	expect(() => parse(`1??2&&3`)).toThrow(/syntax/i)
 })
 
-test(`[rg1nq3]`, () => {
+test(`[rgJSBI.BigInt(1)q3]`, () => {
 	expect(() => parse(`1||2??3`)).toThrow(/syntax/i)
 })
 
-test(`[rg1nrx]`, () => {
+test(`[rgJSBI.BigInt(1)rx]`, () => {
 	expect(() => parse(`1&&2??3`)).toThrow(/syntax/i)
 })
 

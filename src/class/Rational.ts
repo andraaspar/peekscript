@@ -1,37 +1,43 @@
+import JSBI from 'jsbi'
 import { toInt } from '../fun/toInt'
 import { toNumber } from '../fun/toNumber'
 import { DECIMAL_REGEX } from '../model/constants'
 import { TNumber } from '../model/TNumber'
 
-export class Rational {
-	static ZERO = new Rational(0n)
+const ZERO = JSBI.BigInt(0)
 
-	#numerator: bigint
-	#denominator: bigint
-	#signMultiplier: bigint
+export class Rational {
+	static ZERO = new Rational(ZERO)
+
+	#numerator: JSBI
+	#denominator: JSBI
+	#signMultiplier: JSBI
 
 	constructor(
-		numerator: bigint,
-		denominator: bigint = 1n,
-		signMultiplier: bigint = 1n,
+		numerator: JSBI,
+		denominator: JSBI = JSBI.BigInt(1),
+		signMultiplier: JSBI = JSBI.BigInt(1),
 	) {
-		this.#signMultiplier = signMultiplier < 0n && numerator !== 0n ? -1n : 1n
-		this.#numerator = BigInt(numerator)
-		if (this.#numerator < 0n) {
-			this.#signMultiplier = -this.#signMultiplier
-			this.#numerator = -this.#numerator
+		this.#signMultiplier =
+			JSBI.lessThan(signMultiplier, ZERO) && JSBI.notEqual(numerator, ZERO)
+				? JSBI.BigInt(-1)
+				: JSBI.BigInt(1)
+		this.#numerator = JSBI.BigInt(numerator)
+		if (JSBI.lessThan(this.#numerator, ZERO)) {
+			this.#signMultiplier = JSBI.unaryMinus(this.#signMultiplier)
+			this.#numerator = JSBI.unaryMinus(this.#numerator)
 		}
-		this.#denominator = BigInt(denominator)
-		if (this.#denominator === 0n) {
+		this.#denominator = JSBI.BigInt(denominator)
+		if (JSBI.equal(this.#denominator, ZERO)) {
 			throw new Error(`[rgpljw] Division by zero.`)
 		}
-		if (this.#denominator < 0n) {
-			this.#signMultiplier = -this.#signMultiplier
-			this.#denominator = -this.#denominator
+		if (JSBI.lessThan(this.#denominator, ZERO)) {
+			this.#signMultiplier = JSBI.unaryMinus(this.#signMultiplier)
+			this.#denominator = JSBI.unaryMinus(this.#denominator)
 		}
 		const gcd = this.#gcd(this.#numerator, this.#denominator)
-		this.#numerator /= gcd
-		this.#denominator /= gcd
+		this.#numerator = JSBI.divide(this.#numerator, gcd)
+		this.#denominator = JSBI.divide(this.#denominator, gcd)
 	}
 
 	clone() {
@@ -56,29 +62,41 @@ export class Rational {
 
 	isEqualTo(other: Rational): boolean {
 		return (
-			other.#signMultiplier === this.#signMultiplier &&
-			other.#numerator === this.#numerator &&
-			other.#denominator === this.#denominator
+			JSBI.equal(other.#signMultiplier, this.#signMultiplier) &&
+			JSBI.equal(other.#numerator, this.#numerator) &&
+			JSBI.equal(other.#denominator, this.#denominator)
 		)
 	}
 
 	isLessThan(other: Rational): boolean {
-		if (this.#signMultiplier !== other.#signMultiplier) {
-			return this.#signMultiplier < other.#signMultiplier
+		if (JSBI.notEqual(this.#signMultiplier, other.#signMultiplier)) {
+			return JSBI.lessThan(this.#signMultiplier, other.#signMultiplier)
 		}
-		return (
-			this.#signMultiplier * this.#numerator * other.#denominator <
-			other.#signMultiplier * other.#numerator * this.#denominator
+		return JSBI.lessThan(
+			JSBI.multiply(
+				JSBI.multiply(this.#signMultiplier, this.#numerator),
+				other.#denominator,
+			),
+			JSBI.multiply(
+				JSBI.multiply(other.#signMultiplier, other.#numerator),
+				this.#denominator,
+			),
 		)
 	}
 
 	isGreaterThan(other: Rational): boolean {
-		if (this.#signMultiplier !== other.#signMultiplier) {
-			return this.#signMultiplier > other.#signMultiplier
+		if (JSBI.notEqual(this.#signMultiplier, other.#signMultiplier)) {
+			return JSBI.greaterThan(this.#signMultiplier, other.#signMultiplier)
 		}
-		return (
-			this.#signMultiplier * this.#numerator * other.#denominator >
-			other.#signMultiplier * other.#numerator * this.#denominator
+		return JSBI.greaterThan(
+			JSBI.multiply(
+				JSBI.multiply(this.#signMultiplier, this.#numerator),
+				other.#denominator,
+			),
+			JSBI.multiply(
+				JSBI.multiply(other.#signMultiplier, other.#numerator),
+				this.#denominator,
+			),
 		)
 	}
 
@@ -98,11 +116,15 @@ export class Rational {
 		if (!isFinite(n)) {
 			throw new Error(`[rh8feu] Infinity cannot be converted to Rational.`)
 		}
-		const signMultiplier = n < 0 ? -1n : 1n
+		const signMultiplier = n < 0 ? JSBI.BigInt(-1) : JSBI.BigInt(1)
 		let positiveN = Math.abs(n)
 		const fractionPart = positiveN % 1
 		if (fractionPart === 0) {
-			return new Rational(BigInt(positiveN), 1n, signMultiplier)
+			return new Rational(
+				JSBI.BigInt(positiveN),
+				JSBI.BigInt(1),
+				signMultiplier,
+			)
 		} else {
 			let denominator = 1
 			while (positiveN % 1) {
@@ -110,8 +132,8 @@ export class Rational {
 				denominator *= 10
 			}
 			return new Rational(
-				BigInt(positiveN),
-				BigInt(denominator),
+				JSBI.BigInt(positiveN),
+				JSBI.BigInt(denominator),
 				signMultiplier,
 			)
 		}
@@ -120,46 +142,53 @@ export class Rational {
 	static fromString(s: string): Rational {
 		if (/^[-+]?\d+\/[-+]?\d+$/.test(s)) {
 			const [numerator, denominator = ''] = s.split('/')
-			return new Rational(BigInt(numerator), BigInt(denominator))
+			return new Rational(JSBI.BigInt(numerator), JSBI.BigInt(denominator))
 		} else if (DECIMAL_REGEX.test(s)) {
 			if (s.includes('e')) {
 				const [baseString, expString] = s.split('e')
 				const base = Rational.fromString(baseString)
 				return base.multipliedBy(
-					new Rational(10n).toThePowerOf(Rational.fromString(expString)),
+					new Rational(JSBI.BigInt(10)).toThePowerOf(
+						Rational.fromString(expString),
+					),
 				)
 			} else {
 				const sepIndex = s.indexOf('.')
 				if (sepIndex < 0) {
-					return new Rational(BigInt(s))
+					return new Rational(JSBI.BigInt(s))
 				}
 				return new Rational(
-					BigInt(s.replace('.', '')),
-					10n ** BigInt(s.length - 1 - sepIndex),
+					JSBI.BigInt(s.replace('.', '')),
+					JSBI.exponentiate(
+						JSBI.BigInt(10),
+						JSBI.BigInt(s.length - 1 - sepIndex),
+					),
 				)
 			}
 		}
 		throw new Error(`[rh8f5b] Unsupported Rational string: ${s}`)
 	}
 
-	#gcd(a: bigint, b: bigint): bigint {
+	#gcd(a: JSBI, b: JSBI): JSBI {
 		if (!a) return b
 		if (!b) return a
 
 		while (true) {
-			a %= b
-			if (!a) return b
-			b %= a
-			if (!b) return a
+			a = JSBI.remainder(a, b)
+			if (JSBI.equal(a, ZERO)) return b
+			b = JSBI.remainder(b, a)
+			if (JSBI.equal(b, ZERO)) return a
 		}
 	}
 
 	toString() {
-		const sign = this.#signMultiplier < 0n ? '-' : ''
-		if (this.#denominator === 1n) {
-			return sign + this.#numerator
+		const sign = JSBI.lessThan(this.#signMultiplier, ZERO) ? '-' : ''
+		if (JSBI.equal(this.#denominator, JSBI.BigInt(1))) {
+			return sign + this.#numerator.toString()
 		} else {
-			return sign + this.#numerator + '/' + this.#denominator
+			return (
+				sign + this.#numerator.toString() + '/' + this.#denominator.toString()
+			)
 		}
 	}
 
@@ -171,32 +200,51 @@ export class Rational {
 		precision = toInt(precision)
 
 		// Divide
-		let value =
-			(this.#signMultiplier *
-				(this.#numerator * 10n ** BigInt(precision + 1))) /
-			this.#denominator
+		let value = JSBI.divide(
+			JSBI.multiply(
+				this.#signMultiplier,
+				JSBI.multiply(
+					this.#numerator,
+					JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(precision + 1)),
+				),
+			),
+			this.#denominator,
+		)
 
 		// Round
-		if (value >= 0n) {
+		if (JSBI.greaterThanOrEqual(value, ZERO)) {
 			// Positive
-			if (value % 10n >= 5n) {
-				value += 10n
+			if (
+				JSBI.greaterThanOrEqual(
+					JSBI.remainder(value, JSBI.BigInt(10)),
+					JSBI.BigInt(5),
+				)
+			) {
+				value = JSBI.add(value, JSBI.BigInt(10))
 			}
 		} else {
 			// Negative
-			if (value % 10n <= -5n) {
-				value -= 10n
+			if (
+				JSBI.lessThanOrEqual(
+					JSBI.remainder(value, JSBI.BigInt(10)),
+					JSBI.BigInt(-5),
+				)
+			) {
+				value = JSBI.subtract(value, JSBI.BigInt(10))
 			}
 		}
-		value = value / 10n
+		value = JSBI.divide(value, JSBI.BigInt(10))
 
 		// Stringify
-		let valueString = (value < 0 ? -value : value)
+		let valueString = (
+			JSBI.lessThan(value, ZERO) ? JSBI.unaryMinus(value) : value
+		)
 			.toString()
 			.padStart(precision + 1, '0')
 		const splitPoint = Math.max(0, valueString.length - precision)
 		const wholePart =
-			(value < 0n ? '-' : '') + (valueString.slice(0, splitPoint) || '0')
+			(JSBI.lessThan(value, ZERO) ? '-' : '') +
+			(valueString.slice(0, splitPoint) || '0')
 		const fractionPart = valueString.slice(splitPoint)
 		return fractionPart ? wholePart + '.' + fractionPart : wholePart
 	}
@@ -216,74 +264,97 @@ export class Rational {
 		return result
 	}
 
-	toRational() {
-		return this
-	}
-
 	negated(): Rational {
 		return new Rational(
 			this.#numerator,
 			this.#denominator,
-			-this.#signMultiplier,
+			JSBI.unaryMinus(this.#signMultiplier),
 		)
 	}
 
 	plus(other: Rational) {
 		return new Rational(
-			this.#signMultiplier * this.#numerator * other.#denominator +
-				other.#signMultiplier * other.#numerator * this.#denominator,
-			this.#denominator * other.#denominator,
+			JSBI.add(
+				JSBI.multiply(
+					JSBI.multiply(this.#signMultiplier, this.#numerator),
+					other.#denominator,
+				),
+				JSBI.multiply(
+					JSBI.multiply(other.#signMultiplier, other.#numerator),
+					this.#denominator,
+				),
+			),
+			JSBI.multiply(this.#denominator, other.#denominator),
 		)
 	}
 
 	minus(other: Rational) {
 		return new Rational(
-			this.#signMultiplier * this.#numerator * other.#denominator -
-				other.#signMultiplier * other.#numerator * this.#denominator,
-			this.#denominator * other.#denominator,
+			JSBI.subtract(
+				JSBI.multiply(
+					JSBI.multiply(this.#signMultiplier, this.#numerator),
+					other.#denominator,
+				),
+				JSBI.multiply(
+					JSBI.multiply(other.#signMultiplier, other.#numerator),
+					this.#denominator,
+				),
+			),
+			JSBI.multiply(this.#denominator, other.#denominator),
 		)
 	}
 
 	multipliedBy(other: Rational) {
 		return new Rational(
-			this.#signMultiplier *
-				this.#numerator *
-				other.#signMultiplier *
+			JSBI.multiply(
+				JSBI.multiply(
+					JSBI.multiply(this.#signMultiplier, this.#numerator),
+					other.#signMultiplier,
+				),
 				other.#numerator,
-			this.#denominator * other.#denominator,
+			),
+			JSBI.multiply(this.#denominator, other.#denominator),
 		)
 	}
 
 	dividedBy(other: Rational) {
 		return new Rational(
-			this.#signMultiplier *
-				this.#numerator *
-				other.#signMultiplier *
+			JSBI.multiply(
+				JSBI.multiply(
+					JSBI.multiply(this.#signMultiplier, this.#numerator),
+					other.#signMultiplier,
+				),
 				other.#denominator,
-			this.#denominator * other.#numerator,
+			),
+			JSBI.multiply(this.#denominator, other.#numerator),
 		)
 	}
 
 	remainder(other: Rational) {
 		return new Rational(
-			(this.#signMultiplier * (this.#numerator * other.#denominator)) %
-				(this.#denominator * other.#numerator),
-			this.#denominator * other.denominator,
+			JSBI.remainder(
+				JSBI.multiply(
+					JSBI.multiply(this.#signMultiplier, this.#numerator),
+					other.#denominator,
+				),
+				JSBI.multiply(this.#denominator, other.#numerator),
+			),
+			JSBI.multiply(this.#denominator, other.denominator),
 		)
 	}
 
 	toThePowerOf(other: Rational) {
-		if (other.#denominator === 1n) {
-			if (other.#signMultiplier < 0n) {
+		if (JSBI.equal(other.#denominator, JSBI.BigInt(1))) {
+			if (JSBI.lessThan(other.#signMultiplier, ZERO)) {
 				return new Rational(
-					this.#denominator ** other.#numerator,
-					this.#numerator ** other.#numerator,
+					JSBI.exponentiate(this.#denominator, other.#numerator),
+					JSBI.exponentiate(this.#numerator, other.#numerator),
 					this.#signMultiplier,
 				)
 			} else {
 				return new Rational(
-					this.#numerator ** other.#numerator,
-					this.#denominator ** other.#numerator,
+					JSBI.exponentiate(this.#numerator, other.#numerator),
+					JSBI.exponentiate(this.#denominator, other.#numerator),
 					this.#signMultiplier,
 				)
 			}

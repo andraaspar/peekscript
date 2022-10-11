@@ -1,9 +1,11 @@
+import JSBI from 'jsbi'
 import { ILocation } from '../ast/ILocation'
 import { TAssertType } from '../model/TAssertType'
 import { assertErrorText } from './assertErrorText'
 
 /* prettier-ignore */ export function assertType(a: unknown, b: 'string', c?: ILocation): asserts a is string
 /* prettier-ignore */ export function assertType(a: unknown, b: 'number', c?: ILocation): asserts a is number
+/* prettier-ignore */ export function assertType(a: unknown, b: 'jsbi', c?: ILocation): asserts a is JSBI
 /* prettier-ignore */ export function assertType(a: unknown, b: 'bigint', c?: ILocation): asserts a is bigint
 /* prettier-ignore */ export function assertType(a: unknown, b: 'boolean', c?: ILocation): asserts a is boolean
 /* prettier-ignore */ export function assertType(a: unknown, b: 'symbol', c?: ILocation): asserts a is symbol

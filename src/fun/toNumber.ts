@@ -1,6 +1,7 @@
+import JSBI from 'jsbi'
 import { Rational } from '../class/Rational'
 
-export function toNumber(n: number | bigint | Rational): number {
+export function toNumber(n: number | bigint | JSBI | Rational): number {
 	switch (typeof n) {
 		case 'number':
 			return n
@@ -9,6 +10,8 @@ export function toNumber(n: number | bigint | Rational): number {
 		case 'object':
 			if (n instanceof Rational) {
 				return n.toNumber(20)
+			} else if (n instanceof JSBI) {
+				return JSBI.toNumber(n)
 			}
 		default:
 			throw new Error(`[rh8aib] Could not convert ${typeof n} to number.`)
