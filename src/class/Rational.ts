@@ -50,8 +50,8 @@ export class Rational {
 		return this.#denominator
 	}
 
-	get isNegative() {
-		return this.#signMultiplier < 0n
+	get signMultiplier() {
+		return this.#signMultiplier
 	}
 
 	isEqualTo(other: Rational): boolean {
@@ -155,7 +155,7 @@ export class Rational {
 	}
 
 	toString() {
-		const sign = this.isNegative ? '-' : ''
+		const sign = this.#signMultiplier < 0n ? '-' : ''
 		if (this.#denominator === 1n) {
 			return sign + this.#numerator
 		} else {
@@ -274,7 +274,7 @@ export class Rational {
 
 	toThePowerOf(other: Rational) {
 		if (other.#denominator === 1n) {
-			if (other.isNegative) {
+			if (other.#signMultiplier < 0n) {
 				return new Rational(
 					this.#denominator ** other.#numerator,
 					this.#numerator ** other.#numerator,
