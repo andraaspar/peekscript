@@ -1,3 +1,4 @@
+export { default as JSBI } from 'jsbi'
 export { CachedEvaluator } from './class/CachedEvaluator'
 export { Rational } from './class/RationalBigInt'
 export { evaluate } from './fun/evaluate'
