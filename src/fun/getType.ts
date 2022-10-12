@@ -12,6 +12,7 @@ import { TAssertType } from '../model/TAssertType'
 // export function getType(it: Function): 'function'
 // export function getType(it: Rational): 'rational'
 // export function getType(it: JSBI): 'jsbi'
+// export function getType(it: null): 'array'
 // export function getType(it: null): 'null'
 export function getType(it: unknown): TAssertType {
 	const t = typeof it
@@ -19,6 +20,8 @@ export function getType(it: unknown): TAssertType {
 		if (it === null) return 'null'
 		if (it instanceof Rational) return 'rational'
 		if (it instanceof JSBI) return 'jsbi'
+		// Array must come after JSBI as JSBI is a subclass of Array
+		if (Array.isArray(it)) return 'array'
 	}
 	return t
 }

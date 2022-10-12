@@ -366,7 +366,7 @@ test(`[rgpfk4]`, () => {
 })
 
 test(`[rgpfll]`, () => {
-	expect(evaluate(`a`, envMapFrom({ a: [] as any }))).toBe(null)
+	expect(() => evaluate(`a`, envMapFrom({ a: [] as any }))).toThrow(/invalid/i)
 })
 
 test(`[rgpfp3]`, () => {

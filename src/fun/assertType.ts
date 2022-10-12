@@ -11,6 +11,7 @@ import { assertErrorText } from './assertErrorText'
 /* prettier-ignore */ export function assertType(a: unknown, b: 'symbol', c?: ILocation): asserts a is symbol
 /* prettier-ignore */ export function assertType(a: unknown, b: 'undefined', c?: ILocation): asserts a is undefined
 /* prettier-ignore */ export function assertType(a: unknown, b: 'object', c?: ILocation): asserts a is object
+/* prettier-ignore */ export function assertType(a: unknown, b: 'array', c?: ILocation): asserts a is Array<any>
 /* prettier-ignore */ export function assertType(a: unknown, b: 'function', c?: ILocation): asserts a is Function
 export function assertType(
 	it: unknown,

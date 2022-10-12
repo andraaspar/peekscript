@@ -1,6 +1,6 @@
 import { ILocation } from '../ast/ILocation'
-import { getType } from './getType'
 import { locationToString } from './locationToString'
+import { stringifyUnknown } from './stringifyUnknown'
 
 export function assertErrorText(
 	it: unknown,
@@ -9,5 +9,5 @@ export function assertErrorText(
 ): string {
 	return `Expected ${
 		Array.isArray(types) ? types.join(' or ') : types
-	}, got ${getType(it)} ${locationToString(location)}`
+	}, got ${stringifyUnknown(it)} ${locationToString(location)}`
 }

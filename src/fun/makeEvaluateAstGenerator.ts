@@ -1,3 +1,4 @@
+import JSBI from 'jsbi'
 import { ILocation } from '../ast/ILocation'
 import { TExpression } from '../ast/TExpression'
 import { Rational } from '../class/RationalBigInt'
@@ -6,6 +7,7 @@ import { TOutValues } from '../model/TOutValues'
 import { assertErrorText } from './assertErrorText'
 import { assertType } from './assertType'
 import { locationToString } from './locationToString'
+import { stringifyUnknown } from './stringifyUnknown'
 
 export function* makeEvaluateAstGenerator(
 	ast: TExpression,
@@ -271,8 +273,30 @@ export function* makeEvaluateAstGenerator(
 			for (const param of ast.params) {
 				params.push(yield* makeEvaluateAstGenerator(param, env))
 			}
-			const r = fn(...params)
-			return sanitizeResult(r, ast.identifier)
+			let r
+			try {
+				r = fn(...params)
+			} catch (e) {
+				throw new Error(`[rjne0l] [function ${ast.identifier.value}]:\n${e}`, {
+					cause: e instanceof Error ? e : undefined,
+				})
+			}
+			try {
+				return sanitizeResult(r, ast.identifier)
+			} catch (e) {
+				throw new Error(
+					`[rjne44] [function ${
+						ast.identifier.value
+					}] returned an invalid value: ${stringifyUnknown(
+						r,
+					)}\n(${e})\nParameters: (${params
+						.map((it) => stringifyUnknown(it))
+						.join(', ')})`,
+					{
+						cause: e instanceof Error ? e : undefined,
+					},
+				)
+			}
 		}
 		case 'grouping':
 			return yield* makeEvaluateAstGenerator(ast.expression, env)
@@ -295,6 +319,7 @@ export function* makeEvaluateAstGenerator(
 }
 
 function sanitizeResult(result: unknown, location: ILocation): TOutValues {
+	if (result == null) return null
 	switch (typeof result) {
 		case 'function':
 			throw new Error(
@@ -311,13 +336,15 @@ function sanitizeResult(result: unknown, location: ILocation): TOutValues {
 				throw new Error(`[rh8e96] Infinity is not a valid number.`)
 			}
 			return Rational.fromNumber(result)
+		case 'bigint':
+			return Rational.fromNumber(result)
 		case 'object':
 			if (result instanceof Rational) {
 				return result
-			} else {
-				return null
+			} else if (result instanceof JSBI) {
+				return Rational.fromNumber(result)
 			}
 		default:
-			return null
+			throw new Error(`[rjneuq] Invalid value: ${stringifyUnknown(result)}`)
 	}
 }
