@@ -255,6 +255,14 @@ test(`[rggn1t]`, () => {
 	expect(unparse(parse(`a(b(c))`))).toBe(`→a(→b(c)←)←`)
 })
 
+test(`[rjndwl]`, () => {
+	expect(unparse(parse(`a.b()`))).toBe(`→b(a)←`)
+})
+
+test(`[rjnduw]`, () => {
+	expect(unparse(parse(`a.b(c)`))).toBe(`→b(a, c)←`)
+})
+
 // whitespace
 
 test(`[rg1f3s]`, () => {
