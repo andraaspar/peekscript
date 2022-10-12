@@ -1,4 +1,4 @@
-import { evaluateAst, parse, Rational } from '../build/main.js'
+import { evaluateAst, parse, Rational, JSBI } from '../build/main.js'
 
 const envIn = document.getElementById('env-in')
 const code = document.getElementById('code')
@@ -15,8 +15,8 @@ function oninput(e) {
 		const env = new Map(
 			Object.entries(
 				new Function(
-					`'use strict';const Rational=this.Rational;const env=({${envIn.value}});return env`,
-				).apply({ Rational }),
+					`'use strict';const Rational=this.Rational;const JSBI=this.JSBI;const env=({${envIn.value}});return env`,
+				).apply({ Rational, JSBI }),
 			),
 		)
 		const ast = parse(code.value)

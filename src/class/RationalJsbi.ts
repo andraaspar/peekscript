@@ -1,8 +1,8 @@
 import JSBI from 'jsbi'
 import { toInt } from '../fun/toInt'
-import { toNumber } from '../fun/toNumber'
 import { DECIMAL_REGEX } from '../model/constants'
-import { TNumber } from '../model/TNumber'
+
+type TNumber = number | bigint | JSBI | Rational
 
 const ZERO = JSBI.BigInt(0)
 
@@ -14,10 +14,14 @@ export class Rational {
 	#signMultiplier: JSBI
 
 	constructor(
-		numerator: JSBI,
-		denominator: JSBI = JSBI.BigInt(1),
-		signMultiplier: JSBI = JSBI.BigInt(1),
+		numerator: TNumber,
+		denominator: TNumber = JSBI.BigInt(1),
+		signMultiplier: TNumber = JSBI.BigInt(1),
 	) {
+		numerator = Rational.toBigInt(numerator)
+		denominator = Rational.toBigInt(denominator)
+		signMultiplier = Rational.toBigInt(signMultiplier)
+
 		this.#signMultiplier =
 			JSBI.lessThan(signMultiplier, ZERO) && JSBI.notEqual(numerator, ZERO)
 				? JSBI.BigInt(-1)
@@ -60,15 +64,17 @@ export class Rational {
 		return this.#signMultiplier
 	}
 
-	isEqualTo(other: Rational): boolean {
+	isEqualTo(other: unknown): boolean {
 		return (
+			other instanceof Rational &&
 			JSBI.equal(other.#signMultiplier, this.#signMultiplier) &&
 			JSBI.equal(other.#numerator, this.#numerator) &&
 			JSBI.equal(other.#denominator, this.#denominator)
 		)
 	}
 
-	isLessThan(other: Rational): boolean {
+	isLessThan(other: TNumber): boolean {
+		other = Rational.fromNumber(other)
 		if (JSBI.notEqual(this.#signMultiplier, other.#signMultiplier)) {
 			return JSBI.lessThan(this.#signMultiplier, other.#signMultiplier)
 		}
@@ -84,7 +90,8 @@ export class Rational {
 		)
 	}
 
-	isGreaterThan(other: Rational): boolean {
+	isGreaterThan(other: TNumber): boolean {
+		other = Rational.fromNumber(other)
 		if (JSBI.notEqual(this.#signMultiplier, other.#signMultiplier)) {
 			return JSBI.greaterThan(this.#signMultiplier, other.#signMultiplier)
 		}
@@ -109,33 +116,65 @@ export class Rational {
 	}
 
 	static fromNumber(n: TNumber): Rational {
-		n = toNumber(n)
-		if (isNaN(n)) {
-			throw new Error(`[rh8fes] NaN cannot be converted to Rational.`)
+		switch (typeof n) {
+			case 'number':
+				if (isNaN(n)) {
+					throw new Error(`[rjn9fo] NaN cannot be converted to Rational.`)
+				}
+				if (!isFinite(n)) {
+					throw new Error(`[rjn9fq] Infinity cannot be converted to Rational.`)
+				}
+				const signMultiplier = n < 0 ? JSBI.BigInt(-1) : JSBI.BigInt(1)
+				let positiveN = Math.abs(n)
+				const fractionPart = positiveN % 1
+				if (fractionPart === 0) {
+					return new Rational(
+						JSBI.BigInt(positiveN),
+						JSBI.BigInt(1),
+						signMultiplier,
+					)
+				} else {
+					let denominator = 1
+					while (positiveN % 1) {
+						positiveN *= 10
+						denominator *= 10
+					}
+					return new Rational(
+						JSBI.BigInt(positiveN),
+						JSBI.BigInt(denominator),
+						signMultiplier,
+					)
+				}
+			case 'bigint':
+				return new Rational(JSBI.BigInt(n + ''))
+			case 'object':
+				if (n instanceof Rational) {
+					return n
+				} else if (n instanceof JSBI) {
+					return new Rational(n)
+				}
+			default:
+				return Rational.fromNumber(Rational.toBigInt(n))
 		}
-		if (!isFinite(n)) {
-			throw new Error(`[rh8feu] Infinity cannot be converted to Rational.`)
-		}
-		const signMultiplier = n < 0 ? JSBI.BigInt(-1) : JSBI.BigInt(1)
-		let positiveN = Math.abs(n)
-		const fractionPart = positiveN % 1
-		if (fractionPart === 0) {
-			return new Rational(
-				JSBI.BigInt(positiveN),
-				JSBI.BigInt(1),
-				signMultiplier,
-			)
-		} else {
-			let denominator = 1
-			while (positiveN % 1) {
-				positiveN *= 10
-				denominator *= 10
-			}
-			return new Rational(
-				JSBI.BigInt(positiveN),
-				JSBI.BigInt(denominator),
-				signMultiplier,
-			)
+	}
+
+	static toBigInt(n: TNumber): JSBI {
+		switch (typeof n) {
+			case 'number':
+				return JSBI.BigInt(n)
+			case 'bigint':
+				return JSBI.BigInt(n + '')
+			case 'object':
+				if (n instanceof Rational) {
+					return JSBI.divide(
+						JSBI.multiply(n.signMultiplier, n.numerator),
+						n.denominator,
+					)
+				} else if (n instanceof JSBI) {
+					return n
+				}
+			default:
+				throw new Error(`[rjn88d] Could not convert ${typeof n} to bigint.`)
 		}
 	}
 
@@ -184,11 +223,17 @@ export class Rational {
 	toString() {
 		const sign = JSBI.lessThan(this.#signMultiplier, ZERO) ? '-' : ''
 		if (JSBI.equal(this.#denominator, JSBI.BigInt(1))) {
-			return sign + this.#numerator.toString()
+			return '(' + sign + this.#numerator.toString() + ')'
 		} else {
-			return (
-				sign + this.#numerator.toString() + '/' + this.#denominator.toString()
-			)
+			const wholePart = JSBI.divide(this.#numerator, this.#denominator)
+			const wholePartString = JSBI.equal(wholePart, ZERO)
+				? sign
+				: sign + wholePart.toString() + (sign || '+')
+			const fractionPartString =
+				JSBI.remainder(this.#numerator, this.#denominator).toString() +
+				'/' +
+				this.#denominator.toString()
+			return '(' + wholePartString + fractionPartString + ')'
 		}
 	}
 
@@ -272,7 +317,8 @@ export class Rational {
 		)
 	}
 
-	plus(other: Rational) {
+	plus(other: TNumber) {
+		other = Rational.fromNumber(other)
 		return new Rational(
 			JSBI.add(
 				JSBI.multiply(
@@ -288,7 +334,8 @@ export class Rational {
 		)
 	}
 
-	minus(other: Rational) {
+	minus(other: TNumber) {
+		other = Rational.fromNumber(other)
 		return new Rational(
 			JSBI.subtract(
 				JSBI.multiply(
@@ -304,7 +351,8 @@ export class Rational {
 		)
 	}
 
-	multipliedBy(other: Rational) {
+	multipliedBy(other: TNumber) {
+		other = Rational.fromNumber(other)
 		return new Rational(
 			JSBI.multiply(
 				JSBI.multiply(
@@ -317,7 +365,8 @@ export class Rational {
 		)
 	}
 
-	dividedBy(other: Rational) {
+	dividedBy(other: TNumber) {
+		other = Rational.fromNumber(other)
 		return new Rational(
 			JSBI.multiply(
 				JSBI.multiply(
@@ -330,7 +379,8 @@ export class Rational {
 		)
 	}
 
-	remainder(other: Rational) {
+	remainder(other: TNumber) {
+		other = Rational.fromNumber(other)
 		return new Rational(
 			JSBI.remainder(
 				JSBI.multiply(
@@ -343,7 +393,8 @@ export class Rational {
 		)
 	}
 
-	toThePowerOf(other: Rational) {
+	toThePowerOf(other: TNumber) {
+		other = Rational.fromNumber(other)
 		if (JSBI.equal(other.#denominator, JSBI.BigInt(1))) {
 			if (JSBI.lessThan(other.#signMultiplier, ZERO)) {
 				return new Rational(

@@ -1,4 +1,4 @@
 import JSBI from 'jsbi'
-import { Rational } from '../class/RationalBigInt'
+import type { Rational } from '../class/RationalBigInt'
 
 export type TNumber = number | bigint | JSBI | Rational

@@ -1,5 +1,4 @@
 import { toInt } from '../fun/toInt'
-import { toNumber } from '../fun/toNumber'
 import { DECIMAL_REGEX } from '../model/constants'
 import { TNumber } from '../model/TNumber'
 
@@ -11,10 +10,14 @@ export class Rational {
 	#signMultiplier: bigint
 
 	constructor(
-		numerator: bigint,
-		denominator: bigint = 1n,
-		signMultiplier: bigint = 1n,
+		numerator: TNumber,
+		denominator: TNumber = 1n,
+		signMultiplier: TNumber = 1n,
 	) {
+		numerator = Rational.toBigInt(numerator)
+		denominator = Rational.toBigInt(denominator)
+		signMultiplier = Rational.toBigInt(signMultiplier)
+
 		this.#signMultiplier = signMultiplier < 0n && numerator !== 0n ? -1n : 1n
 		this.#numerator = BigInt(numerator)
 		if (this.#numerator < 0n) {
@@ -54,15 +57,17 @@ export class Rational {
 		return this.#signMultiplier
 	}
 
-	isEqualTo(other: Rational): boolean {
+	isEqualTo(other: unknown): boolean {
 		return (
+			other instanceof Rational &&
 			other.#signMultiplier === this.#signMultiplier &&
 			other.#numerator === this.#numerator &&
 			other.#denominator === this.#denominator
 		)
 	}
 
-	isLessThan(other: Rational): boolean {
+	isLessThan(other: TNumber): boolean {
+		other = Rational.fromNumber(other)
 		if (this.#signMultiplier !== other.#signMultiplier) {
 			return this.#signMultiplier < other.#signMultiplier
 		}
@@ -72,7 +77,8 @@ export class Rational {
 		)
 	}
 
-	isGreaterThan(other: Rational): boolean {
+	isGreaterThan(other: TNumber): boolean {
+		other = Rational.fromNumber(other)
 		if (this.#signMultiplier !== other.#signMultiplier) {
 			return this.#signMultiplier > other.#signMultiplier
 		}
@@ -91,29 +97,54 @@ export class Rational {
 	}
 
 	static fromNumber(n: TNumber): Rational {
-		n = toNumber(n)
-		if (isNaN(n)) {
-			throw new Error(`[rh8fes] NaN cannot be converted to Rational.`)
+		switch (typeof n) {
+			case 'number':
+				if (isNaN(n)) {
+					throw new Error(`[rh8fes] NaN cannot be converted to Rational.`)
+				}
+				if (!isFinite(n)) {
+					throw new Error(`[rh8feu] Infinity cannot be converted to Rational.`)
+				}
+				const signMultiplier = n < 0 ? -1n : 1n
+				let positiveN = Math.abs(n)
+				const fractionPart = positiveN % 1
+				if (fractionPart === 0) {
+					return new Rational(BigInt(positiveN), 1n, signMultiplier)
+				} else {
+					let denominator = 1
+					while (positiveN % 1) {
+						positiveN *= 10
+						denominator *= 10
+					}
+					return new Rational(
+						BigInt(positiveN),
+						BigInt(denominator),
+						signMultiplier,
+					)
+				}
+			case 'bigint':
+				return new Rational(n)
+			case 'object':
+				if (n instanceof Rational) {
+					return n
+				}
+			default:
+				return Rational.fromNumber(Rational.toBigInt(n))
 		}
-		if (!isFinite(n)) {
-			throw new Error(`[rh8feu] Infinity cannot be converted to Rational.`)
-		}
-		const signMultiplier = n < 0 ? -1n : 1n
-		let positiveN = Math.abs(n)
-		const fractionPart = positiveN % 1
-		if (fractionPart === 0) {
-			return new Rational(BigInt(positiveN), 1n, signMultiplier)
-		} else {
-			let denominator = 1
-			while (positiveN % 1) {
-				positiveN *= 10
-				denominator *= 10
-			}
-			return new Rational(
-				BigInt(positiveN),
-				BigInt(denominator),
-				signMultiplier,
-			)
+	}
+
+	static toBigInt(n: TNumber): bigint {
+		switch (typeof n) {
+			case 'number':
+				return BigInt(n)
+			case 'bigint':
+				return n
+			case 'object':
+				if (n instanceof Rational) {
+					return (n.signMultiplier * n.numerator) / n.denominator
+				}
+			default:
+				throw new Error(`[rjn88d] Could not convert ${typeof n} to bigint.`)
 		}
 	}
 
@@ -157,9 +188,14 @@ export class Rational {
 	toString() {
 		const sign = this.#signMultiplier < 0n ? '-' : ''
 		if (this.#denominator === 1n) {
-			return sign + this.#numerator
+			return '(' + sign + this.#numerator + ')'
 		} else {
-			return sign + this.#numerator + '/' + this.#denominator
+			const wholePart = this.#numerator / this.#denominator
+			const wholePartString =
+				wholePart === 0n ? sign : sign + wholePart + (sign || '+')
+			const fractionPartString =
+				(this.#numerator % this.#denominator) + '/' + this.#denominator
+			return '(' + wholePartString + fractionPartString + ')'
 		}
 	}
 
@@ -224,7 +260,8 @@ export class Rational {
 		)
 	}
 
-	plus(other: Rational) {
+	plus(other: TNumber) {
+		other = Rational.fromNumber(other)
 		return new Rational(
 			this.#signMultiplier * this.#numerator * other.#denominator +
 				other.#signMultiplier * other.#numerator * this.#denominator,
@@ -232,7 +269,8 @@ export class Rational {
 		)
 	}
 
-	minus(other: Rational) {
+	minus(other: TNumber) {
+		other = Rational.fromNumber(other)
 		return new Rational(
 			this.#signMultiplier * this.#numerator * other.#denominator -
 				other.#signMultiplier * other.#numerator * this.#denominator,
@@ -240,7 +278,8 @@ export class Rational {
 		)
 	}
 
-	multipliedBy(other: Rational) {
+	multipliedBy(other: TNumber) {
+		other = Rational.fromNumber(other)
 		return new Rational(
 			this.#signMultiplier *
 				this.#numerator *
@@ -250,7 +289,8 @@ export class Rational {
 		)
 	}
 
-	dividedBy(other: Rational) {
+	dividedBy(other: TNumber) {
+		other = Rational.fromNumber(other)
 		return new Rational(
 			this.#signMultiplier *
 				this.#numerator *
@@ -260,7 +300,8 @@ export class Rational {
 		)
 	}
 
-	remainder(other: Rational) {
+	remainder(other: TNumber) {
+		other = Rational.fromNumber(other)
 		return new Rational(
 			(this.#signMultiplier * (this.#numerator * other.#denominator)) %
 				(this.#denominator * other.#numerator),
@@ -268,7 +309,8 @@ export class Rational {
 		)
 	}
 
-	toThePowerOf(other: Rational) {
+	toThePowerOf(other: TNumber) {
+		other = Rational.fromNumber(other)
 		if (other.#denominator === 1n) {
 			if (other.#signMultiplier < 0n) {
 				return new Rational(

@@ -1,7 +1,9 @@
 import JSBI from 'jsbi'
 import { Rational } from '../class/RationalBigInt'
+import type { Rational as RationalJsbi } from '../class/RationalJsbi'
+import { TNumber } from '../model/TNumber'
 
-export function toNumber(n: number | bigint | JSBI | Rational): number {
+export function toNumber(n: TNumber | RationalJsbi): number {
 	switch (typeof n) {
 		case 'number':
 			return n

@@ -22,24 +22,30 @@ test(`[rgpij1]`, () => {
 })
 
 test(`[rgpkhq]`, () => {
-	expect(new Rational(JSBI.BigInt(2), JSBI.BigInt(8)).toString()).toBe('1/4')
+	expect(new Rational(JSBI.BigInt(2), JSBI.BigInt(8)).toString()).toBe('(1/4)')
 })
 
 test(`[rgplld]`, () => {
-	expect(new Rational(JSBI.BigInt(-2), JSBI.BigInt(8)).toString()).toBe('-1/4')
+	expect(new Rational(JSBI.BigInt(-2), JSBI.BigInt(8)).toString()).toBe(
+		'(-1/4)',
+	)
 })
 
 test(`[rgpllw]`, () => {
-	expect(new Rational(JSBI.BigInt(2), JSBI.BigInt(-8)).toString()).toBe('-1/4')
+	expect(new Rational(JSBI.BigInt(2), JSBI.BigInt(-8)).toString()).toBe(
+		'(-1/4)',
+	)
 })
 
 test(`[rgplmb]`, () => {
-	expect(new Rational(JSBI.BigInt(-2), JSBI.BigInt(-8)).toString()).toBe('1/4')
+	expect(new Rational(JSBI.BigInt(-2), JSBI.BigInt(-8)).toString()).toBe(
+		'(1/4)',
+	)
 })
 
 test(`[rgplny]`, () => {
 	expect(new Rational(JSBI.BigInt(714), JSBI.BigInt(85)).toString()).toBe(
-		'42/5',
+		'(8+2/5)',
 	)
 })
 
@@ -48,15 +54,15 @@ test(`[rgppns]`, () => {
 })
 
 test(`[rgpprr]`, () => {
-	expect(Rational.fromNumber(1.25).toString()).toBe('5/4')
+	expect(Rational.fromNumber(1.25).toString()).toBe('(1+1/4)')
 })
 
 test(`[rgpptv]`, () => {
-	expect(Rational.fromNumber(3).toString()).toBe('3')
+	expect(Rational.fromNumber(3).toString()).toBe('(3)')
 })
 
 test(`[rgpqj2]`, () => {
-	expect(Rational.fromNumber(3).toString()).toBe('3')
+	expect(Rational.fromNumber(3).toString()).toBe('(3)')
 })
 
 test(`[rgppwa]`, () => {
@@ -86,7 +92,7 @@ test(`[rgprdd]`, () => {
 		new Rational(JSBI.BigInt(1), JSBI.BigInt(4))
 			.plus(new Rational(JSBI.BigInt(2), JSBI.BigInt(8)))
 			.toString(),
-	).toBe('1/2')
+	).toBe('(1/2)')
 })
 
 test(`[rgprf3]`, () => {
@@ -94,7 +100,7 @@ test(`[rgprf3]`, () => {
 		new Rational(JSBI.BigInt(1), JSBI.BigInt(4))
 			.plus(new Rational(JSBI.BigInt(-3), JSBI.BigInt(8)))
 			.toString(),
-	).toBe('-1/8')
+	).toBe('(-1/8)')
 })
 
 test(`[rgprgb]`, () => {
@@ -102,7 +108,7 @@ test(`[rgprgb]`, () => {
 		new Rational(JSBI.BigInt(-1), JSBI.BigInt(4))
 			.plus(new Rational(JSBI.BigInt(3), JSBI.BigInt(8)))
 			.toString(),
-	).toBe('1/8')
+	).toBe('(1/8)')
 })
 
 test(`[rgprgx]`, () => {
@@ -110,7 +116,7 @@ test(`[rgprgx]`, () => {
 		new Rational(JSBI.BigInt(-1), JSBI.BigInt(4))
 			.plus(new Rational(JSBI.BigInt(-2), JSBI.BigInt(8)))
 			.toString(),
-	).toBe('-1/2')
+	).toBe('(-1/2)')
 })
 
 test(`[rgprie]`, () => {
@@ -124,7 +130,7 @@ test(`[rgprxn]`, () => {
 		new Rational(JSBI.BigInt(1), JSBI.BigInt(2))
 			.minus(new Rational(JSBI.BigInt(1), JSBI.BigInt(4)))
 			.toString(),
-	).toBe('1/4')
+	).toBe('(1/4)')
 })
 
 test(`[rgps09]`, () => {
@@ -132,7 +138,7 @@ test(`[rgps09]`, () => {
 		new Rational(JSBI.BigInt(1), JSBI.BigInt(2))
 			.minus(new Rational(JSBI.BigInt(-1), JSBI.BigInt(4)))
 			.toString(),
-	).toBe('3/4')
+	).toBe('(3/4)')
 })
 
 test(`[rgps0b]`, () => {
@@ -140,7 +146,7 @@ test(`[rgps0b]`, () => {
 		new Rational(JSBI.BigInt(1), JSBI.BigInt(2))
 			.multipliedBy(new Rational(JSBI.BigInt(1), JSBI.BigInt(2)))
 			.toString(),
-	).toBe('1/4')
+	).toBe('(1/4)')
 })
 
 test(`[rgps1e]`, () => {
@@ -148,7 +154,7 @@ test(`[rgps1e]`, () => {
 		new Rational(JSBI.BigInt(1), JSBI.BigInt(2))
 			.multipliedBy(new Rational(JSBI.BigInt(-1), JSBI.BigInt(2)))
 			.toString(),
-	).toBe('-1/4')
+	).toBe('(-1/4)')
 })
 
 test(`[rgps1v]`, () => {
@@ -156,7 +162,7 @@ test(`[rgps1v]`, () => {
 		new Rational(JSBI.BigInt(1), JSBI.BigInt(2))
 			.dividedBy(new Rational(JSBI.BigInt(1), JSBI.BigInt(4)))
 			.toString(),
-	).toBe('2')
+	).toBe('(2)')
 })
 
 test(`[rgpsJSBI.BigInt(4)]`, () => {
@@ -164,7 +170,7 @@ test(`[rgpsJSBI.BigInt(4)]`, () => {
 		new Rational(JSBI.BigInt(1), JSBI.BigInt(2))
 			.dividedBy(new Rational(JSBI.BigInt(-1), JSBI.BigInt(4)))
 			.toString(),
-	).toBe('-2')
+	).toBe('(-2)')
 })
 
 test(`[rgps64]`, () => {
@@ -204,7 +210,7 @@ test(`[rgpvc5]`, () => {
 		new Rational(JSBI.BigInt(3))
 			.toThePowerOf(new Rational(JSBI.BigInt(2)))
 			.toString(),
-	).toBe('9')
+	).toBe('(9)')
 })
 
 test(`[rgpytk]`, () => {
@@ -212,7 +218,7 @@ test(`[rgpytk]`, () => {
 		new Rational(JSBI.BigInt(5))
 			.toThePowerOf(new Rational(JSBI.BigInt(3)))
 			.toString(),
-	).toBe('125')
+	).toBe('(125)')
 })
 
 test(`[rgsz02]`, () => {
@@ -220,7 +226,7 @@ test(`[rgsz02]`, () => {
 		new Rational(JSBI.BigInt(2), JSBI.BigInt(3))
 			.toThePowerOf(new Rational(JSBI.BigInt(2)))
 			.toString(),
-	).toBe('4/9')
+	).toBe('(4/9)')
 })
 
 test(`[rgsz2d]`, () => {
@@ -228,7 +234,7 @@ test(`[rgsz2d]`, () => {
 		new Rational(JSBI.BigInt(5))
 			.toThePowerOf(new Rational(JSBI.BigInt(-2)))
 			.toString(),
-	).toBe('1/25')
+	).toBe('(1/25)')
 })
 
 test(`[rgszbw]`, () => {
@@ -236,7 +242,7 @@ test(`[rgszbw]`, () => {
 		new Rational(JSBI.BigInt(5))
 			.toThePowerOf(new Rational(JSBI.BigInt(0)))
 			.toString(),
-	).toBe('1')
+	).toBe('(1)')
 })
 
 test(`[rgszbw]`, () => {
@@ -244,7 +250,7 @@ test(`[rgszbw]`, () => {
 		new Rational(JSBI.BigInt(5))
 			.toThePowerOf(new Rational(JSBI.BigInt(1)))
 			.toString(),
-	).toBe('5')
+	).toBe('(5)')
 })
 
 test(`[rgpw5t]`, () => {
@@ -260,11 +266,11 @@ test(`[rgt403]`, () => {
 		new Rational(JSBI.BigInt(10))
 			.remainder(new Rational(JSBI.BigInt(7)))
 			.toString(),
-	).toBe('3')
+	).toBe('(3)')
 })
 
 test(`[rgt64c]`, () => {
-	expect(Rational.fromString('-2/6').toString()).toBe('-1/3')
+	expect(Rational.fromString('-2/6').toString()).toBe('(-1/3)')
 })
 
 test(`[rgti5f]`, () => {
