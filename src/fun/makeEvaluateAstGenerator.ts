@@ -6,6 +6,7 @@ import { TEnvMap } from '../model/TEnvMap'
 import { TOutValues } from '../model/TOutValues'
 import { assertErrorText } from './assertErrorText'
 import { assertType } from './assertType'
+import { getType } from './getType'
 import { locationToString } from './locationToString'
 import { stringifyUnknown } from './stringifyUnknown'
 
@@ -297,6 +298,60 @@ export function* makeEvaluateAstGenerator(
 					},
 				)
 			}
+		}
+		case 'access': {
+			const json = yield* makeEvaluateAstGenerator(ast.object, env)
+			const t = getType(json)
+			switch (t) {
+				case 'null':
+				case 'undefined':
+					return null
+				case 'string':
+					break
+				default:
+					throw new Error(
+						`[rjnhqs] Cannot access field '${
+							ast.key.value
+						}' of ${stringifyUnknown(json)} ${locationToString(ast.key)}`,
+					)
+			}
+			let obj
+			try {
+				obj = JSON.parse(json as string)
+			} catch (e) {
+				throw new Error(
+					`[rjnhxb] Cannot access field '${ast.key.value}' of ${getType(
+						json,
+					)} because it is invalid JSON: ${e}`,
+					{ cause: e instanceof Error ? e : undefined },
+				)
+			}
+			let value
+			switch (getType(obj)) {
+				case 'object': {
+					switch (ast.key.type) {
+						case 'keyword':
+							value = obj[ast.key.text]
+							break
+						case 'identifier':
+							value = obj[ast.key.text]
+							break
+					}
+					break
+				}
+				default:
+					throw new Error(
+						`[rjnj0r] Cannot access field '${ast.key.value}' of ${getType(
+							json,
+						)} because it is not an object ${locationToString(ast.key)}`,
+					)
+			}
+			switch (getType(value)) {
+				case 'array':
+				case 'object':
+					value = JSON.stringify(value)
+			}
+			return sanitizeResult(value, ast.key)
 		}
 		case 'grouping':
 			return yield* makeEvaluateAstGenerator(ast.expression, env)

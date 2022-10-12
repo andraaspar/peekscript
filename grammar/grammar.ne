@@ -128,6 +128,8 @@ unary ->
 funcall ->
   funcall _ "." _ identifier _ funparams
     {% data => ({ type: 'funcall', identifier: data[4], params: [data[0], ...data[6]] }) %}
+  | funcall _ "." _ (identifier | boolean | null_)
+    {% data => ({ type: 'access', object: data[0], key: data[4][0] }) %}
   | identifier _ funparams
     {% data => ({ type: 'funcall', identifier: data[0], params: data[2] }) %}
   | grouping

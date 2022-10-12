@@ -1,3 +1,4 @@
+import { IAccess } from './IAccess'
 import { IBinary } from './IBinary'
 import { IFuncall } from './IFuncall'
 import { IGrouping } from './IGrouping'
@@ -10,5 +11,6 @@ export type TExpression =
 	| IBinary
 	| IUnary
 	| IFuncall
+	| IAccess
 	| IGrouping
 	| TValue

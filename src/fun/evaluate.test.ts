@@ -372,3 +372,61 @@ test(`[rgpfll]`, () => {
 test(`[rgpfp3]`, () => {
 	expect(() => evaluate(`(`, envMapFrom({}))).toThrow(/parse/i)
 })
+
+test(`[rjnif0]`, () => {
+	expect(evaluate(`a.b`, envMapFrom({ a: JSON.stringify({ b: 'hey' }) }))).toBe(
+		'hey',
+	)
+})
+
+test(`[rjniga]`, () => {
+	expect(
+		evaluate(`a.b.c`, envMapFrom({ a: JSON.stringify({ b: { c: true } }) })),
+	).toBe(true)
+})
+
+test(`[rjniic]`, () => {
+	expect(
+		evaluate(`a.missing`, envMapFrom({ a: JSON.stringify({ b: 'hey' }) })),
+	).toBe(null)
+})
+
+test(`[rjnile]`, () => {
+	expect(() => evaluate(`a.b`, envMapFrom({ a: 'boo' }))).toThrow(/json/i)
+})
+
+test(`[rjnipp]`, () => {
+	expect(evaluate(`null.a`, envMapFrom({}))).toBe(null)
+})
+
+test(`[rjnisv]`, () => {
+	expect(() => evaluate(`3.a`, envMapFrom({}))).toThrow(/access/i)
+})
+
+test(`[rjniud]`, () => {
+	expect(() => evaluate(`'{"unfinished}'.a`, envMapFrom({}))).toThrow(/json/i)
+})
+
+test(`[rjnivp]`, () => {
+	expect(() => evaluate(`'["hey"]'.0`, envMapFrom({}))).toThrow(/syntax/i)
+})
+
+test(`[rjnixh]`, () => {
+	expect(() => evaluate(`'["hey"]'.length`, envMapFrom({}))).toThrow(/access/i)
+})
+
+test(`[rjnj52]`, () => {
+	expect(evaluate(`'{}'.prototype`, envMapFrom({}))).toBe(null)
+})
+
+test(`[rjnj80]`, () => {
+	expect(evaluate(`'{"null":true}'.null`, envMapFrom({}))).toBe(true)
+})
+
+test(`[rjnkma]`, () => {
+	expect(evaluate(`'{"true":true}'.true`, envMapFrom({}))).toBe(true)
+})
+
+test(`[rjnkmk]`, () => {
+	expect(evaluate(`'{"false":true}'.false`, envMapFrom({}))).toBe(true)
+})
