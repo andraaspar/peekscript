@@ -7,7 +7,6 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const common = {
 	mode: 'production',
-	target: ['web', 'es5'],
 	module: {
 		rules: [
 			{
