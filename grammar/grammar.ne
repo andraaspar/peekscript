@@ -126,7 +126,9 @@ unary ->
     {% id %}
 
 funcall ->
-  identifier _ funparams
+  funcall _ "." _ identifier _ funparams
+    {% data => ({ type: 'funcall', identifier: data[4], params: [data[0], ...data[6]] }) %}
+  | identifier _ funparams
     {% data => ({ type: 'funcall', identifier: data[0], params: data[2] }) %}
   | grouping
     {% id %}
