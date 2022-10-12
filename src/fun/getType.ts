@@ -1,5 +1,5 @@
 import JSBI from 'jsbi'
-import { Rational } from '../class/Rational'
+import { Rational } from '../class/RationalBigInt'
 import { TAssertType } from '../model/TAssertType'
 
 // export function getType(it: undefined): 'undefined'

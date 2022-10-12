@@ -1,5 +1,5 @@
 export { CachedEvaluator } from './class/CachedEvaluator'
-export { Rational } from './class/Rational'
+export { Rational } from './class/RationalBigInt'
 export { evaluate } from './fun/evaluate'
 export { evaluateAst } from './fun/evaluateAst'
 export { findIdentifiers } from './fun/findIdentifiers'

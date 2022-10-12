@@ -1,6 +1,7 @@
 import HtmlWebpackPlugin from 'html-webpack-plugin'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import webpack from 'webpack'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -22,11 +23,17 @@ const common = {
 		],
 	},
 	output: {
-		path: path.resolve(__dirname, './dist'),
+		path: path.resolve(__dirname, '../dist'),
 	},
 	optimization: {
 		minimize: false,
 	},
+	plugins: [
+		new webpack.NormalModuleReplacementPlugin(
+			/RationalBigInt.js/,
+			'./RationalJsbi.js',
+		),
+	],
 }
 
 export default [
@@ -46,6 +53,7 @@ export default [
 			filename: 'index.[contenthash].js',
 		},
 		plugins: [
+			...common.plugins,
 			new HtmlWebpackPlugin({
 				template: './test/index.html',
 				filename: 'index.html',
@@ -60,6 +68,7 @@ export default [
 			filename: 'interactive.[contenthash].js',
 		},
 		plugins: [
+			...common.plugins,
 			new HtmlWebpackPlugin({
 				template: './test/interactive.html',
 				filename: 'interactive.html',

@@ -1,5 +1,5 @@
 import JSBI from 'jsbi'
-import { Rational } from '../class/Rational'
+import { Rational } from '../class/RationalBigInt'
 
 export function toNumber(n: number | bigint | JSBI | Rational): number {
 	switch (typeof n) {

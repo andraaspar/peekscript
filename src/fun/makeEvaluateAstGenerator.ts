@@ -1,6 +1,6 @@
 import { ILocation } from '../ast/ILocation'
 import { TExpression } from '../ast/TExpression'
-import { Rational } from '../class/Rational'
+import { Rational } from '../class/RationalBigInt'
 import { TEnvMap } from '../model/TEnvMap'
 import { TOutValues } from '../model/TOutValues'
 import { assertErrorText } from './assertErrorText'

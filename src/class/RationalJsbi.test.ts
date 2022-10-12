@@ -1,5 +1,5 @@
 import JSBI from 'jsbi'
-import { Rational } from './Rational'
+import { Rational } from './RationalJsbi'
 
 test(`[rgph47]`, () => {
 	expect(new Rational(JSBI.BigInt(1), JSBI.BigInt(3)).toFixed(3)).toBe('0.333')

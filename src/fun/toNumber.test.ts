@@ -1,5 +1,5 @@
 import JSBI from 'jsbi'
-import { Rational } from '../class/Rational'
+import { Rational } from '../class/RationalBigInt'
 import { toNumber } from './toNumber'
 
 test(`[rjlc7n]`, () => {
