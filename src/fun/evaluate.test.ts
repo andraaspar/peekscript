@@ -3,6 +3,7 @@ import { TEnv } from '../model/TEnv'
 import { TEnvMap } from '../model/TEnvMap'
 import { evaluate } from './evaluate'
 import { evaluateAst } from './evaluateAst'
+import { jsonStringifyInOrder } from './jsonStringifyInOrder'
 import { parse } from './parse'
 
 function envMapFrom(o: TEnv): TEnvMap {
@@ -230,7 +231,7 @@ test(`[rgepnu]`, () => {
 		evaluate(
 			`filter(myArray, 'item % 2 == 0')`,
 			(env = envMapFrom({
-				myArray: JSON.stringify([0, 1, 2, 3, 4]),
+				myArray: jsonStringifyInOrder([0, 1, 2, 3, 4]),
 				filter: (what, how) => {
 					if (typeof what !== 'string' || typeof how !== 'string') {
 						throw new Error(
@@ -243,7 +244,7 @@ test(`[rgepnu]`, () => {
 					if (!Array.isArray(arr)) {
 						throw new Error(`Expected array, got: ${what}`)
 					}
-					return JSON.stringify(
+					return jsonStringifyInOrder(
 						(arr as number[]).filter((n) => {
 							innerEnv.set('item', n)
 							return evaluateAst(ast, innerEnv)
@@ -404,20 +405,26 @@ test(`[rgpfp3]`, () => {
 })
 
 test(`[rjnif0]`, () => {
-	expect(evaluate(`a.b`, envMapFrom({ a: JSON.stringify({ b: 'hey' }) }))).toBe(
-		'hey',
-	)
+	expect(
+		evaluate(`a.b`, envMapFrom({ a: jsonStringifyInOrder({ b: 'hey' }) })),
+	).toBe('hey')
 })
 
 test(`[rjniga]`, () => {
 	expect(
-		evaluate(`a.b.c`, envMapFrom({ a: JSON.stringify({ b: { c: true } }) })),
+		evaluate(
+			`a.b.c`,
+			envMapFrom({ a: jsonStringifyInOrder({ b: { c: true } }) }),
+		),
 	).toBe(true)
 })
 
 test(`[rjniic]`, () => {
 	expect(
-		evaluate(`a.missing`, envMapFrom({ a: JSON.stringify({ b: 'hey' }) })),
+		evaluate(
+			`a.missing`,
+			envMapFrom({ a: jsonStringifyInOrder({ b: 'hey' }) }),
+		),
 	).toBe(null)
 })
 
@@ -489,19 +496,21 @@ test(`[rjoq36]`, () => {
 	expect(
 		evaluate(
 			`a['b']['c']`,
-			envMapFrom({ a: JSON.stringify({ b: { c: true } }) }),
+			envMapFrom({ a: jsonStringifyInOrder({ b: { c: true } }) }),
 		),
 	).toBe(true)
 })
 
 test(`[rjoq58]`, () => {
-	expect(evaluate(`a['b']`, envMapFrom({ a: JSON.stringify({}) }))).toBe(null)
+	expect(evaluate(`a['b']`, envMapFrom({ a: jsonStringifyInOrder({}) }))).toBe(
+		null,
+	)
 })
 
 test(`[rjoq60]`, () => {
-	expect(evaluate(`a['b']['c']`, envMapFrom({ a: JSON.stringify({}) }))).toBe(
-		null,
-	)
+	expect(
+		evaluate(`a['b']['c']`, envMapFrom({ a: jsonStringifyInOrder({}) })),
+	).toBe(null)
 })
 
 test(`[rjoq79]`, () => {
@@ -514,13 +523,13 @@ test(`[rjoq8b]`, () => {
 
 test(`[rjoq8m]`, () => {
 	expect(() =>
-		evaluate(`a[null]`, envMapFrom({ a: JSON.stringify({}) })),
+		evaluate(`a[null]`, envMapFrom({ a: jsonStringifyInOrder({}) })),
 	).toThrow(/key/i)
 })
 
 test(`[rjoqal]`, () => {
 	expect(() =>
-		evaluate(`a[true]`, envMapFrom({ a: JSON.stringify({}) })),
+		evaluate(`a[true]`, envMapFrom({ a: jsonStringifyInOrder({}) })),
 	).toThrow(/key/i)
 })
 

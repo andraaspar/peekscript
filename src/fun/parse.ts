@@ -10,7 +10,7 @@ export function parse(code: string): TExpression | null | undefined {
 		parser.feed(code)
 		const asts = parser.results as TExpression[]
 		if (asts.length > 1) {
-			// console.error(`[rggn62]`, JSON.stringify(asts, null, 2))
+			// console.error(`[rggn62]`, jsonStringifyInOrder(asts, null, 2))
 			throw new Error(`[rgekiu] Ambiguous code: ${code}`)
 		}
 		if (asts.length === 0 && code.trim()) {

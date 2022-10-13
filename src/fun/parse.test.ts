@@ -1,4 +1,5 @@
 import { TExpression } from '../ast/TExpression'
+import { jsonStringifyInOrder } from './jsonStringifyInOrder'
 import { parse } from './parse'
 
 function unparse(ast: TExpression | null | undefined): string {
@@ -38,7 +39,7 @@ function unparse(ast: TExpression | null | undefined): string {
 		case 'number':
 			return ast.text
 	}
-	return `►Unknown:${JSON.stringify(ast)}◄`
+	return `►Unknown:${jsonStringifyInOrder(ast)}◄`
 }
 
 // primitives

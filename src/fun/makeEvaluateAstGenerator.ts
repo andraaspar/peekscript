@@ -7,6 +7,7 @@ import { TOutValues } from '../model/TOutValues'
 import { assertErrorText } from './assertErrorText'
 import { assertType } from './assertType'
 import { getType } from './getType'
+import { jsonStringifyInOrder } from './jsonStringifyInOrder'
 import { locationToString } from './locationToString'
 import { stringifyUnknown } from './stringifyUnknown'
 import { toInt } from './toInt'
@@ -350,7 +351,7 @@ export function* makeEvaluateAstGenerator(
 			switch (getType(value)) {
 				case 'array':
 				case 'object':
-					value = JSON.stringify(value)
+					value = jsonStringifyInOrder(value)
 			}
 			return sanitizeResult(value, ast.key)
 		}
@@ -443,7 +444,7 @@ export function* makeEvaluateAstGenerator(
 			switch (getType(value)) {
 				case 'array':
 				case 'object':
-					value = JSON.stringify(value)
+					value = jsonStringifyInOrder(value)
 			}
 			return sanitizeResult(value, ast)
 		}
