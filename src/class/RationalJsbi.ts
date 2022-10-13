@@ -44,14 +44,6 @@ export class Rational {
 		this.#denominator = JSBI.divide(this.#denominator, gcd)
 	}
 
-	clone() {
-		return new Rational(
-			this.#numerator,
-			this.#denominator,
-			this.#signMultiplier,
-		)
-	}
-
 	get numerator() {
 		return this.#numerator
 	}
@@ -174,7 +166,7 @@ export class Rational {
 					return n
 				}
 			default:
-				throw new Error(`[rjn88d] Could not convert ${typeof n} to bigint.`)
+				throw new Error(`[rjn88d] Could not convert ${typeof n} to JSBI.`)
 		}
 	}
 

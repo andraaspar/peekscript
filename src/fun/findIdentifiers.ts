@@ -36,6 +36,13 @@ function findIdentifiersInternal(
 				findIdentifiersInternal(param, identifiers)
 			}
 			break
+		case 'access':
+			findIdentifiersInternal(ast.object, identifiers)
+			break
+		case 'eaccess':
+			findIdentifiersInternal(ast.object, identifiers)
+			findIdentifiersInternal(ast.key, identifiers)
+			break
 		case 'grouping':
 			findIdentifiersInternal(ast.expression, identifiers)
 			break

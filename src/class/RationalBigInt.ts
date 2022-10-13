@@ -1,3 +1,4 @@
+import JSBI from 'jsbi'
 import { toInt } from '../fun/toInt'
 import { DECIMAL_REGEX } from '../model/constants'
 import { TNumber } from '../model/TNumber'
@@ -35,14 +36,6 @@ export class Rational {
 		const gcd = this.#gcd(this.#numerator, this.#denominator)
 		this.#numerator /= gcd
 		this.#denominator /= gcd
-	}
-
-	clone() {
-		return new Rational(
-			this.#numerator,
-			this.#denominator,
-			this.#signMultiplier,
-		)
 	}
 
 	get numerator() {
@@ -142,9 +135,11 @@ export class Rational {
 			case 'object':
 				if (n instanceof Rational) {
 					return (n.signMultiplier * n.numerator) / n.denominator
+				} else if (n instanceof JSBI) {
+					return BigInt(n.toString())
 				}
 			default:
-				throw new Error(`[rjn88d] Could not convert ${typeof n} to bigint.`)
+				throw new Error(`[rjotvu] Could not convert ${typeof n} to bigint.`)
 		}
 	}
 

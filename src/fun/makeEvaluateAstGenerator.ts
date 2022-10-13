@@ -9,6 +9,7 @@ import { assertType } from './assertType'
 import { getType } from './getType'
 import { locationToString } from './locationToString'
 import { stringifyUnknown } from './stringifyUnknown'
+import { toInt } from './toInt'
 
 export function* makeEvaluateAstGenerator(
 	ast: TExpression,
@@ -352,6 +353,99 @@ export function* makeEvaluateAstGenerator(
 					value = JSON.stringify(value)
 			}
 			return sanitizeResult(value, ast.key)
+		}
+		case 'eaccess': {
+			const key = yield* makeEvaluateAstGenerator(ast.key, env)
+			const keyType = getType(key)
+			switch (keyType) {
+				case 'rational':
+				case 'string':
+					break
+				default:
+					throw new Error(
+						`[rjopfn] Invalid key type ${stringifyUnknown(
+							key,
+						)} ${locationToString(ast)}`,
+					)
+			}
+			const json = yield* makeEvaluateAstGenerator(ast.object, env)
+			const jsonType = getType(json)
+			switch (jsonType) {
+				case 'null':
+				case 'undefined':
+					return null
+				case 'string':
+					break
+				default:
+					throw new Error(
+						`[rjopho] Cannot access field ${stringifyUnknown(
+							key,
+						)} of ${stringifyUnknown(json)} ${locationToString(ast)}`,
+					)
+			}
+			let obj
+			try {
+				obj = JSON.parse(json as string)
+			} catch (e) {
+				throw new Error(
+					`[rjophm] Cannot access field ${stringifyUnknown(key)} of ${getType(
+						json,
+					)} because it is invalid JSON: ${e}`,
+					{ cause: e instanceof Error ? e : undefined },
+				)
+			}
+			let value
+			switch (getType(obj)) {
+				case 'null':
+					return null
+				case 'array': {
+					switch (keyType) {
+						case 'rational':
+							try {
+								value = obj[toInt(key as Rational)]
+							} catch (e) {
+								throw new Error(
+									`[rjoqwt] Invalid key ${locationToString(ast)}\n${e}`,
+									{ cause: e instanceof Error ? e : undefined },
+								)
+							}
+							break
+						default:
+							throw new Error(
+								`[rjopna] Cannot access field ${stringifyUnknown(
+									key,
+								)} of ${getType(json)} ${locationToString(ast)}`,
+							)
+					}
+					break
+				}
+				case 'object': {
+					switch (keyType) {
+						case 'string':
+							value = obj[key as string]
+							break
+						default:
+							throw new Error(
+								`[rjopow] Cannot access field ${stringifyUnknown(
+									key,
+								)} of ${getType(json)} ${locationToString(ast)}`,
+							)
+					}
+					break
+				}
+				default:
+					throw new Error(
+						`[rjoprc] Cannot access field ${stringifyUnknown(key)} of ${getType(
+							json,
+						)} because it is not an object or array ${locationToString(ast)}`,
+					)
+			}
+			switch (getType(value)) {
+				case 'array':
+				case 'object':
+					value = JSON.stringify(value)
+			}
+			return sanitizeResult(value, ast)
 		}
 		case 'grouping':
 			return yield* makeEvaluateAstGenerator(ast.expression, env)

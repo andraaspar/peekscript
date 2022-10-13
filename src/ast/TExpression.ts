@@ -1,5 +1,6 @@
 import { IAccess } from './IAccess'
 import { IBinary } from './IBinary'
+import { IEaccess } from './IEaccess'
 import { IFuncall } from './IFuncall'
 import { IGrouping } from './IGrouping'
 import { ITernary } from './ITernary'
@@ -12,5 +13,6 @@ export type TExpression =
 	| IUnary
 	| IFuncall
 	| IAccess
+	| IEaccess
 	| IGrouping
 	| TValue

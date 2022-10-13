@@ -12,6 +12,8 @@ function unparse(ast: TExpression | null | undefined): string {
 				.join(', ')})←`
 		case 'access':
 			return `→${unparse(ast.object)}.${ast.key.value}←`
+		case 'eaccess':
+			return `→${unparse(ast.object)}[${unparse(ast.key)}]←`
 		case 'unary':
 			return `→${ast.op.value}${unparse(ast.param)}←`
 		case 'equality':
@@ -275,8 +277,22 @@ test(`[rjnibj]`, () => {
 	expect(unparse(parse(`a.b.c`))).toBe(`→→a.b←.c←`)
 })
 
-test(`[rjnibj]`, () => {
+test(`[rjnl8a]`, () => {
 	expect(unparse(parse(`a.b.c(d)`))).toBe(`→c(→a.b←, d)←`)
+})
+
+// eaccess
+
+test(`[rjnl85]`, () => {
+	expect(unparse(parse(`a[0]`))).toBe(`→a[0]←`)
+})
+
+test(`[rjnl88]`, () => {
+	expect(unparse(parse(`a[0][1]`))).toBe(`→→a[0]←[1]←`)
+})
+
+test(`[rjnl8c]`, () => {
+	expect(unparse(parse(`a[1+1]`))).toBe(`→a[→1 + 1←]←`)
 })
 
 // whitespace

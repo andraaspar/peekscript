@@ -1,3 +1,4 @@
+import JSBI from 'jsbi'
 import { TEnv } from '../model/TEnv'
 import { TEnvMap } from '../model/TEnvMap'
 import { evaluate } from './evaluate'
@@ -166,6 +167,35 @@ test(`[rgelkl]`, () => {
 	expect(evaluate(`fn()`, envMapFrom({ fn: () => 3.1 }))?.toString()).toBe(
 		'(3+1/10)',
 	)
+})
+
+test(`[rjosz0]`, () => {
+	expect(() =>
+		evaluate(
+			`fn()`,
+			envMapFrom({
+				fn: () => {
+					throw new Error('hey')
+				},
+			}),
+		),
+	).toThrow(/fn[^]*hey/im)
+})
+
+test(`[rjoszm]`, () => {
+	expect(() => evaluate(`fn()`, envMapFrom({ fn: () => [] as any }))).toThrow(
+		/invalid/i,
+	)
+})
+
+test(`[rjotg1]`, () => {
+	expect(evaluate(`fn()`, envMapFrom({ fn: () => 5n }))?.toString()).toBe('(5)')
+})
+
+test(`[rjotm5]`, () => {
+	expect(
+		evaluate(`fn()`, envMapFrom({ fn: () => JSBI.BigInt(5) }))?.toString(),
+	).toBe('(5)')
 })
 
 test(`[rgen6u]`, () => {
@@ -415,6 +445,10 @@ test(`[rjnixh]`, () => {
 	expect(() => evaluate(`'["hey"]'.length`, envMapFrom({}))).toThrow(/access/i)
 })
 
+test(`[rjot3p]`, () => {
+	expect(() => evaluate(`a[0]`, envMapFrom({ a: '5' }))).toThrow(/access/i)
+})
+
 test(`[rjnj52]`, () => {
 	expect(evaluate(`'{}'.prototype`, envMapFrom({}))).toBe(null)
 })
@@ -429,4 +463,81 @@ test(`[rjnkma]`, () => {
 
 test(`[rjnkmk]`, () => {
 	expect(evaluate(`'{"false":true}'.false`, envMapFrom({}))).toBe(true)
+})
+
+test(`[rjopxq]`, () => {
+	expect(evaluate(`'{"a":true}'['a']`, envMapFrom({}))).toBe(true)
+})
+
+test(`[rjopz3]`, () => {
+	expect(evaluate(`'["hey"]'[0]`, envMapFrom({}))).toBe('hey')
+})
+
+test(`[rjoq00]`, () => {
+	expect(evaluate(`'["hey","ho"]'[1]`, envMapFrom({}))).toBe('ho')
+})
+
+test(`[rjoq11]`, () => {
+	expect(() => evaluate(`'{}'[0]`, envMapFrom({}))).toThrow(/access/i)
+})
+
+test(`[rjoq1x]`, () => {
+	expect(() => evaluate(`'[]'['a']`, envMapFrom({}))).toThrow(/access/i)
+})
+
+test(`[rjoq36]`, () => {
+	expect(
+		evaluate(
+			`a['b']['c']`,
+			envMapFrom({ a: JSON.stringify({ b: { c: true } }) }),
+		),
+	).toBe(true)
+})
+
+test(`[rjoq58]`, () => {
+	expect(evaluate(`a['b']`, envMapFrom({ a: JSON.stringify({}) }))).toBe(null)
+})
+
+test(`[rjoq60]`, () => {
+	expect(evaluate(`a['b']['c']`, envMapFrom({ a: JSON.stringify({}) }))).toBe(
+		null,
+	)
+})
+
+test(`[rjoq79]`, () => {
+	expect(() => evaluate(`0[1]`, envMapFrom({}))).toThrow(/access/i)
+})
+
+test(`[rjoq8b]`, () => {
+	expect(() => evaluate(`true['a']`, envMapFrom({}))).toThrow(/access/i)
+})
+
+test(`[rjoq8m]`, () => {
+	expect(() =>
+		evaluate(`a[null]`, envMapFrom({ a: JSON.stringify({}) })),
+	).toThrow(/key/i)
+})
+
+test(`[rjoqal]`, () => {
+	expect(() =>
+		evaluate(`a[true]`, envMapFrom({ a: JSON.stringify({}) })),
+	).toThrow(/key/i)
+})
+
+test(`[rjoqc8]`, () => {
+	expect(() => evaluate(`a['b']`, envMapFrom({ a: '{"unfinished}' }))).toThrow(
+		/json/i,
+	)
+})
+
+test(`[rjoqfr]`, () => {
+	expect(() => evaluate(`a['b']`, envMapFrom({ a: 'hey' }))).toThrow(/string/i)
+})
+
+test(`[rjoqpz]`, () => {
+	expect(evaluate(`a['b']`, envMapFrom({ a: 'null' }))).toBe(null)
+})
+
+test(`[rjoqzc]`, () => {
+	expect(() => evaluate(`a[0.1]`, envMapFrom({ a: '[]' }))).toThrow(/key/i)
 })

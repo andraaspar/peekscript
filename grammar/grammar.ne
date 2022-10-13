@@ -32,6 +32,8 @@
         '(',
         ')',
         '.',
+        '[',
+        ']',
       ],
       whitespace: { match: /[ \t]+/ },
     },
@@ -130,6 +132,8 @@ funcall ->
     {% data => ({ type: 'funcall', identifier: data[4], params: [data[0], ...data[6]] }) %}
   | funcall _ "." _ (identifier | boolean | null_)
     {% data => ({ type: 'access', object: data[0], key: data[4][0] }) %}
+  | funcall _ "[" _ expression _ "]"
+    {% data => ({ ...data[2], type: 'eaccess', object: data[0], key: data[4] }) %}
   | identifier _ funparams
     {% data => ({ type: 'funcall', identifier: data[0], params: data[2] }) %}
   | grouping
