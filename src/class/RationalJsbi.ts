@@ -201,8 +201,8 @@ export class Rational {
 	}
 
 	#gcd(a: JSBI, b: JSBI): JSBI {
-		if (!a) return b
-		if (!b) return a
+		if (JSBI.equal(a, ZERO)) return b
+		if (JSBI.equal(b, ZERO)) return a
 
 		while (true) {
 			a = JSBI.remainder(a, b)
